@@ -1,0 +1,2 @@
+# copilot-governance-framework
+CopilotのAIガバナンスを検討する際のフレームワーク
