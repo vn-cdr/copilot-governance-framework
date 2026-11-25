@@ -1,0 +1,1605 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Copilot AIガバナンス設計書</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f6f3; --surface:#ffffff; --fg:#1c2024; --muted:#5a626a; --line:#d8dbde;
+  --accent:#2f5bd3; --accent-soft:#e7edfc; --amber:#a86400; --amber-soft:#fcf0da;
+  --green:#2b7a4b; --green-soft:#e2f2e8; --gray-soft:#eef0f2; --red:#b42318; --red-soft:#fde8e6;
+  --code:#f1f2f4;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#14171a; --surface:#1c2024; --fg:#e6e8ea; --muted:#a1a9b1; --line:#343a40;
+    --accent:#86a8ff; --accent-soft:#213052; --amber:#f0b35a; --amber-soft:#3a2b13;
+    --green:#72d19a; --green-soft:#19321f; --gray-soft:#252a2f; --red:#ff8a80; --red-soft:#3b1f1d;
+    --code:#22272c;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#14171a; --surface:#1c2024; --fg:#e6e8ea; --muted:#a1a9b1; --line:#343a40;
+  --accent:#86a8ff; --accent-soft:#213052; --amber:#f0b35a; --amber-soft:#3a2b13;
+  --green:#72d19a; --green-soft:#19321f; --gray-soft:#252a2f; --red:#ff8a80; --red-soft:#3b1f1d;
+  --code:#22272c;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--fg);
+  font-family:"Noto Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI",Meiryo,system-ui,sans-serif;
+  font-size:15.5px;line-height:1.8;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-underline-offset:3px}
+.layout{display:grid;grid-template-columns:250px minmax(0,1fr);max-width:1240px;margin:0 auto;gap:40px;padding:0 24px}
+nav.toc{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;padding:32px 0}
+nav.toc .toc-title{font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:10px}
+nav.toc ol{list-style:none;margin:0;padding:0}
+nav.toc li a{display:block;padding:6px 10px;border-radius:6px;color:var(--fg);text-decoration:none;font-size:13.5px;line-height:1.5}
+nav.toc li a:hover{background:var(--surface)}
+nav.toc li a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+main{padding:40px 0 96px;min-width:0}
+header.hero{border-bottom:1px solid var(--line);padding-bottom:28px;margin-bottom:12px}
+.eyebrow{font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.06em}
+h1{font-size:30px;line-height:1.35;margin:8px 0 6px}
+.subtitle{font-size:16px;color:var(--muted);margin:0}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.badge{font-size:12px;padding:3px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+h2{font-size:23px;margin:56px 0 14px;padding-top:12px;border-top:3px solid var(--fg);scroll-margin-top:16px}
+h3{font-size:18px;margin:34px 0 10px;scroll-margin-top:16px}
+h4{font-size:15.5px;margin:22px 0 8px}
+p{margin:10px 0}
+hr{display:none}
+ul,ol{padding-left:1.4em}
+li{margin:3px 0}
+strong{font-weight:700}
+code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.88em;background:var(--code);padding:1px 5px;border-radius:4px}
+pre{background:var(--code);border:1px solid var(--line);border-radius:10px;padding:14px 16px;overflow:auto;line-height:1.55}
+pre code{background:none;padding:0;font-size:13px}
+.table-wrap{overflow-x:auto;margin:14px 0;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14px;line-height:1.6}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{background:var(--gray-soft);font-weight:700;white-space:nowrap;font-size:13px}
+tr:last-child td{border-bottom:none}
+blockquote.note{margin:14px 0;padding:10px 16px;border-left:4px solid var(--amber);background:var(--amber-soft);border-radius:0 8px 8px 0}
+blockquote.note p{margin:4px 0}
+figure.fig{margin:24px 0 28px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px 14px}
+.fig-head{display:flex;align-items:baseline;gap:10px;margin-bottom:10px}
+.fig-num{font-size:12px;font-weight:700;color:#fff;background:var(--accent);padding:2px 9px;border-radius:999px}
+:root[data-theme="dark"] .fig-num{color:var(--bg)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .fig-num{color:var(--bg)}}
+.fig-title{font-weight:700;font-size:15px}
+.fig-scroll{overflow-x:auto}
+.fig-scroll svg{display:block;width:100%;height:auto}
+figcaption{font-size:13px;color:var(--muted);margin-top:10px;line-height:1.6}
+/* SVG styles */
+svg text{font-family:inherit}
+.t{fill:var(--fg);font-size:13px}
+.t-s{fill:var(--muted);font-size:11.5px}
+.t-b{font-weight:700}
+.t-acc{fill:var(--accent)}
+.s-box{fill:var(--surface);stroke:var(--line);stroke-width:1.2}
+.s-layer{fill:var(--gray-soft);stroke:var(--line);stroke-width:1.2}
+.s-layer-acc{fill:var(--accent-soft);fill-opacity:.45;stroke:var(--accent);stroke-width:1.2}
+.s-acc{fill:var(--accent-soft);stroke:var(--accent);stroke-width:1.2}
+.s-amb{fill:var(--amber-soft);stroke:var(--amber);stroke-width:1.2}
+.s-grn{fill:var(--green-soft);stroke:var(--green);stroke-width:1.2}
+.s-gray{fill:var(--gray-soft);stroke:var(--muted);stroke-width:1.2}
+.s-dash{stroke-dasharray:6 4}
+.ln{stroke:var(--muted);stroke-width:1.4;fill:none}
+.ln-dash{stroke-dasharray:5 4}
+.ah{fill:var(--muted)}
+.grid{stroke:var(--line);stroke-width:1}
+.area{fill:var(--accent);fill-opacity:.12}
+.ln-access{stroke:var(--accent);stroke-width:3;fill:none}
+.ln-ent{stroke:var(--amber);stroke-width:3;fill:none;stroke-dasharray:8 5}
+.dot{fill:var(--surface);stroke:var(--fg);stroke-width:2}
+.theme-btn{position:fixed;right:16px;bottom:16px;z-index:5;border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  border-radius:999px;padding:8px 14px;font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+details.toc-mobile{display:none}
+@media (max-width: 980px){
+  .layout{grid-template-columns:1fr;padding:0 16px;gap:0}
+  nav.toc{display:none}
+  details.toc-mobile{display:block;margin:16px 0 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  details.toc-mobile summary{cursor:pointer;font-weight:700;font-size:14px}
+  details.toc-mobile ol{list-style:none;padding:0;margin:8px 0 0}
+  details.toc-mobile a{display:block;padding:4px 0;font-size:14px;text-decoration:none}
+  h1{font-size:24px}
+  h2{font-size:20px}
+  main{padding-top:24px}
+  figure.fig{padding:12px}
+}
+@media print{
+  nav.toc,.theme-btn,details.toc-mobile{display:none}
+  .layout{display:block}
+  figure.fig,table{break-inside:avoid}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<button class="theme-btn" type="button" id="themeBtn" aria-label="表示テーマの切り替え">表示：自動</button>
+<div class="layout">
+  <nav class="toc" aria-label="目次">
+    <div class="toc-title">目次</div>
+    <ol>
+<li><a href="#第0章-v2からの変更点">第0章 v2からの変更点</a></li>
+<li><a href="#第1章-前提とスコープ">第1章 前提とスコープ</a></li>
+<li><a href="#第2章-課題疑問の整理">第2章 課題・疑問の整理</a></li>
+<li><a href="#第3章-基本方針と段階導入">第3章 基本方針と段階導入</a></li>
+<li><a href="#第4章-必要なgithub設定">第4章 必要なGitHub設定</a></li>
+<li><a href="#第5章-ドキュメント体系">第5章 ドキュメント体系</a></li>
+<li><a href="#第6章-リスク台帳">第6章 リスク台帳</a></li>
+<li><a href="#第7章-モニタリング">第7章 モニタリング</a></li>
+<li><a href="#第8章-次のアクション">第8章 次のアクション</a></li>
+<li><a href="#第9章-参照した情報2026年11月25日時点">第9章 参照した情報（2026年11月25日時点）</a></li>
+    </ol>
+  </nav>
+  <main>
+    <header class="hero">
+      <div class="eyebrow">AIガバナンス ／ GitHub Copilot</div>
+      <h1>GitHub Copilot AIガバナンス設計書 v3.1</h1>
+      <p class="subtitle">GitHub Enterpriseプラン（GHEC）・Copilot Enterprise相当前提／1,000ユーザー以上・1,000リポジトリ以上</p>
+      <div class="badges">
+        <span class="badge">基準日 2026年11月25日</span>
+        <span class="badge">GHEC（GHESは対象外）</span>
+        <span class="badge">Copilot Enterprise相当</span>
+        <span class="badge">図版8点入りHTML版</span>
+      </div>
+      <details class="toc-mobile">
+        <summary>目次</summary>
+        <ol>
+<li><a href="#第0章-v2からの変更点">第0章 v2からの変更点</a></li>
+<li><a href="#第1章-前提とスコープ">第1章 前提とスコープ</a></li>
+<li><a href="#第2章-課題疑問の整理">第2章 課題・疑問の整理</a></li>
+<li><a href="#第3章-基本方針と段階導入">第3章 基本方針と段階導入</a></li>
+<li><a href="#第4章-必要なgithub設定">第4章 必要なGitHub設定</a></li>
+<li><a href="#第5章-ドキュメント体系">第5章 ドキュメント体系</a></li>
+<li><a href="#第6章-リスク台帳">第6章 リスク台帳</a></li>
+<li><a href="#第7章-モニタリング">第7章 モニタリング</a></li>
+<li><a href="#第8章-次のアクション">第8章 次のアクション</a></li>
+<li><a href="#第9章-参照した情報2026年11月25日時点">第9章 参照した情報（2026年11月25日時点）</a></li>
+        </ol>
+      </details>
+    </header>
+<ul>
+<li>作成基準日：2026年11月25日（2026年11月25日までに公開されたGitHub Changelog・Docsを反映）</li>
+<li>改訂履歴：v3.1（2026年11月25日、DevSecOpsフレームワーク・ランナーのEgress制御との分担を明確化）／v3（2026年11月25日）／v2（2026年11月13日）</li>
+</ul>
+<h3 id="この文書の読み方">この文書の読み方</h3>
+<ul>
+<li>章と節は「第4章」「4.6」のように番号で表します。本文中の「（→4.6）」は「4.6節を参照」という意味です。</li>
+<li>各記述の確度は次の3段階で示します。</li>
+<li><strong>公式</strong>：GitHub公式のDocs・Changelogで確認済み</li>
+<li><strong>二次</strong>：報道・解説記事による情報</li>
+<li><strong>前版</strong>：v1／v2作成時点の情報で、今回は再確認していない</li>
+</ul>
+<hr />
+<figure class="fig"><div class="fig-head"><span class="fig-num">図1</span><span class="fig-title">ガバナンスの全体像：3つの層と前提</span></div><div class="fig-scroll"><svg viewBox="0 0 960 410" role="img" aria-label="ガバナンスの全体像" style="min-width:680px"><defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="60" y="20" width="640" height="100" rx="8" class="s-layer" /><text x="78" y="40" class="t t-b" text-anchor="start" dominant-baseline="central" >① 体制・方針（ルール＝ユーザー責任の「標準」）</text><rect x="80" y="56" width="187" height="50" rx="8" class="s-box" /><text x="173.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AIガバナンス委員会</text><text x="173.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >承認・意思決定</text><rect x="287" y="56" width="187" height="50" rx="8" class="s-box" /><text x="380.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >生成AI利用ポリシー</text><text x="380.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >（文書①）</text><rect x="494" y="56" width="187" height="50" rx="8" class="s-box" /><text x="587.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >利用ガイドライン（②）</text><text x="587.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >レビュー基準（③）</text><rect x="60" y="150" width="640" height="110" rx="8" class="s-layer-acc" /><text x="78" y="170" class="t t-b t-acc" text-anchor="start" dominant-baseline="central" >② 技術で強制（GitHub設定）</text><rect x="75" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="147.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AI Controls</text><text x="147.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >モデル・機能・BYOK</text><rect x="230" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="302.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >managed-settings</text><text x="302.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >権限・MCP制限</text><rect x="385" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="457.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >ルールセット</text><text x="457.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >CODEOWNERS</text><rect x="540" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="612.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >予算</text><text x="612.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >上限で停止</text><rect x="60" y="290" width="640" height="100" rx="8" class="s-layer" /><text x="78" y="310" class="t t-b" text-anchor="start" dominant-baseline="central" >③ 監視・見直し</text><rect x="80" y="326" width="187" height="50" rx="8" class="s-box" /><text x="173.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >使用量メトリクスAPI</text><text x="173.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >利用・コスト・BYOK検知</text><rect x="287" y="326" width="187" height="50" rx="8" class="s-box" /><text x="380.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >監査ログ（SIEM）</text><text x="380.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >エージェント操作の追跡</text><rect x="494" y="326" width="187" height="50" rx="8" class="s-box" /><text x="587.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >四半期レビュー</text><text x="587.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >リスク台帳の更新</text><path d="M380,120 L380,148" class="ln" marker-end="url(#ah1)"/><path d="M380,260 L380,288" class="ln" marker-end="url(#ah1)"/><path d="M60,350 L34,350 L34,70 L58,70" class="ln" marker-end="url(#ah1)"/><text x="22" y="210" class="t-s" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 22 210)">見直しを反映</text><rect x="735" y="150" width="205" height="110" rx="8" class="s-gray s-dash" /><text x="837" y="172" class="t t-b" text-anchor="middle" dominant-baseline="central" >前提（本書の対象外）</text><text x="837" y="200" class="t" text-anchor="middle" dominant-baseline="central" >DevSecOpsフレームワーク</text><text x="837" y="224" class="t" text-anchor="middle" dominant-baseline="central" >ランナーのEgress制御</text><text x="837" y="246" class="t-s" text-anchor="middle" dominant-baseline="central" >→1.4</text><path d="M700,205 L733,205" class="ln ln-dash" marker-end="url(#ah1)"/><text x="717" y="192" class="t-s" text-anchor="middle" dominant-baseline="central" >要件</text></svg></div><figcaption>方針でルールを決め、強制できるものはGitHub設定で担保し、監視の結果を方針に戻す。一般的なサプライチェーン対策とランナーのEgress制御は前提として別の取り組みで扱う（→1.4）。</figcaption></figure>
+<h2 id="第0章-v2からの変更点">第0章 v2からの変更点</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>変更内容</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>規模を「約5,000」から「<strong>1,000ユーザー以上・1,000リポジトリ以上</strong>」に変更。段階導入の人数は比率で表記</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Copilot Businessをスコープ外</strong>に変更。Copilot Enterprise相当（GitHub Enterpriseプランに含まれるCopilot access、またはCopilot Enterprise）を前提とする</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>2026年11月25日までのリリースを反映</strong>（下表）</td>
+</tr>
+<tr>
+<td>4</td>
+<td>2.1の論点ツリーに、各問い（Q1〜Q5）と本書の該当章・設定・文書との<strong>対応表</strong>を追加</td>
+</tr>
+<tr>
+<td>5</td>
+<td>「§」表記を廃止し、「第X章」「X.X」「（→X.X）」の表記に統一</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>v3.1</strong>：一般的なソフトウェアサプライチェーン対策（Actions、依存関係管理など）とランナーのEgress制御を、別途検討する「DevSecOpsフレームワーク」の範囲とし、本書の対象外に変更。1.4を新設、旧4.9（Actions）を削除、4.7にクラウドエージェントと自社ランナーの関係を追記</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>今回反映した主なリリース（2026年10月〜11月25日）</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>日付</th>
+<th>リリース</th>
+<th>ガバナンス上の影響</th>
+<th>反映先</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>10/09</td>
+<td>ローカルサンドボックスがGA（CLI・Copilot app・VS Code）</td>
+<td>エージェントのファイル・ネットワーク・資格情報へのアクセスを制限できる。追加費用なし</td>
+<td>4.5</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>10/09</td>
+<td>Copilot appで、Copilotライセンスとリポジトリに<strong>別々のGitHubアカウント</strong>を使用可能に</td>
+<td>会社のライセンスで社外アカウントのリポジトリを扱う経路になり得る</td>
+<td>2.2、4.4</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>10/28</td>
+<td>GitHub EnterpriseにCopilot access同梱（シート料$0、含有クレジットなし）</td>
+<td>コストの上限は予算のみ</td>
+<td>1.2、4.6</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>10/28</td>
+<td>Copilot Fusion（自動モデルルーティング）GA</td>
+<td>モデルポリシーの範囲内でのみ動作</td>
+<td>4.3</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/03</td>
+<td>使用量メトリクスAPIでBYOK利用を区別して取得可能に</td>
+<td>BYOK利用の検知</td>
+<td>第7章</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/06</td>
+<td>Copilot code reviewの設定をREST／GraphQL APIで管理可能に。Enterpriseが管理する設定は下位で上書き不可</td>
+<td>IaC化・ドリフト防止</td>
+<td>4.4</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/10</td>
+<td>エンタープライズのGitHub AppからCopilotシート管理APIを呼べるように（新権限「Enterprise Copilot license management」）</td>
+<td>シート割当の自動化をPATなしで実装可能</td>
+<td>4.1</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/16</td>
+<td>一部モデルの廃止。<strong>既定のモデル有効化が有効だと、代替モデルが自動で有効化される</strong></td>
+<td>既定有効化を切らないと承認外モデルが増える</td>
+<td>4.3</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/16</td>
+<td>新モデルClaude Fable 5.2：<strong>既定でデータ保持が必要</strong>、Business／Enterpriseでは<strong>ポリシー既定オフ</strong></td>
+<td>データ保持条件の異なるモデルの承認判断が必要</td>
+<td>4.3</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/16</td>
+<td>managed setting「strictPluginOnlyCustomization」追加。スキル、カスタムエージェント、フック、MCPサーバー、拡張機能を、プラグインまたはmanaged settings由来に限定できる</td>
+<td>利用者個人・リポジトリ単位の野良MCP・エージェント定義を遮断できる</td>
+<td>4.5</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/17</td>
+<td>Copilot CLIでMicrosoft Entraサインイン（プレビュー、EMU＋OIDCのみ）</td>
+<td>SSO統合が容易に。プレビューのため評価対象</td>
+<td>4.1</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>11/17</td>
+<td>Copilot appのブラウザ操作、Azure DevOps連携（プレビュー）</td>
+<td>エージェントの操作範囲が拡大</td>
+<td>4.4</td>
+<td>二次</td>
+</tr>
+<tr>
+<td>11/18</td>
+<td>チーム単位のカスタマイズ（チームが選んだプラグインがメンバーに既定で有効）GA。エンタープライズ／組織の制御は上書きされない</td>
+<td>チームメンテナーが配布経路を持つ</td>
+<td>4.5</td>
+<td>二次（Changelogを引用した記事）</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="第1章-前提とスコープ">第1章 前提とスコープ</h2>
+<h3 id="11-環境">1.1 環境</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>前提</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>プラットフォーム</td>
+<td>GitHub Enterprise Cloud（GHESは対象外）</td>
+</tr>
+<tr>
+<td>規模</td>
+<td><strong>1,000ユーザー以上</strong>（全員がGHECライセンス保有と仮定）、<strong>1,000リポジトリ以上</strong></td>
+</tr>
+<tr>
+<td>リポジトリ可視性</td>
+<td>数名の管理者以外はprivateのみ</td>
+</tr>
+<tr>
+<td>Copilotの提供方式</td>
+<td><strong>Copilot Enterprise相当</strong>：GitHub Enterpriseプランに含まれる「Copilot access」を第一候補、Copilot Enterpriseを代替とする</td>
+</tr>
+<tr>
+<td>GHAS</td>
+<td>追加費用のため未導入の可能性あり。「あり／なし」を併記</td>
+</tr>
+<tr>
+<td>承認済み生成AI</td>
+<td>限定的（例：Claude・ChatGPTのみ）。Copilot内のモデルも同じ範囲に合わせる想定</td>
+</tr>
+<tr>
+<td>運用方針</td>
+<td>申請・例外処理を最小化し、ユーザー責任の「標準」を中心にする</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="12-スコープ外">1.2 スコープ外</h3>
+<ul>
+<li><strong>Copilot Business</strong>（同一エンタープライズ内でCopilot accessと混在できないため、比較・設定の対象外とする）</li>
+<li>GHES</li>
+<li>個人プラン（Copilot Free／Pro／Pro+／Max）の業務利用。禁止の対象としてのみ扱う</li>
+<li>一般的なソフトウェアサプライチェーン対策と、ランナーのEgress制御（→1.4）</li>
+</ul>
+<h3 id="13-提供方式の比較copilot-enterprise相当の2方式">1.3 提供方式の比較（Copilot Enterprise相当の2方式）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>Copilot access（GitHub Enterpriseプラン同梱）</th>
+<th>Copilot Enterprise</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>シート料</td>
+<td>GHECライセンス保有者は<strong>$0</strong>（非保有者はCopilot Standaloneで月$10）</td>
+<td>月$39／ユーザー</td>
+</tr>
+<tr>
+<td>含有AIクレジット</td>
+<td><strong>なし</strong>（初回利用から従量）</td>
+<td>3,900／ユーザー／月（エンタープライズ内でプール）</td>
+</tr>
+<tr>
+<td>機能・モデル</td>
+<td>Copilot Enterpriseと同等</td>
+<td>―</td>
+</tr>
+<tr>
+<td>シート割当</td>
+<td>必要（自動では付与されない）</td>
+<td>必要</td>
+</tr>
+<tr>
+<td>契約経路</td>
+<td>2026-10-28時点ではGitHub／Microsoftのアカウントチーム経由のみ。セルフサービスは段階的に開放予定</td>
+<td>通常購入</td>
+</tr>
+<tr>
+<td>移行</td>
+<td>任意。月初1日付で発効</td>
+<td>―</td>
+</tr>
+</tbody>
+</table></div>
+<p>確度：公式</p>
+<p><strong>試算（1クレジット＝$0.01と推定。Copilot Enterpriseの$39に3,900クレジットが含まれることからの逆算で、当社の契約単価は要確認）</strong></p>
+<p>1,000名、全員GHECライセンス保有の場合。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>月間の利用額</th>
+<th>Copilot Enterprise</th>
+<th>Copilot access</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>$20,000</td>
+<td>$39,000（未使用枠は失効）</td>
+<td><strong>$20,000</strong></td>
+</tr>
+<tr>
+<td>$39,000</td>
+<td>$39,000</td>
+<td>$39,000</td>
+</tr>
+<tr>
+<td>$60,000</td>
+<td>$39,000＋超過$21,000＝$60,000</td>
+<td>$60,000</td>
+</tr>
+</tbody>
+</table></div>
+<p>示唆：単価が同じなら、Copilot accessは常にCopilot Enterprise以下のコストになる。ただし<strong>シート料という上限がなく、予算設定が唯一の歯止め</strong>になる（→4.6）。</p>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図2</span><span class="fig-title">提供方式別の月額コスト（1,000名の場合）</span></div><div class="fig-scroll"><svg viewBox="0 0 960 380" role="img" aria-label="提供方式別の月額コスト" style="min-width:680px"><defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><line x1="90.0" y1="320.0" x2="890.0" y2="320.0" class="grid"/><text x="80.0" y="320.0" class="t-s" text-anchor="end" dominant-baseline="central" >$0</text><text x="90.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$0</text><line x1="90.0" y1="250.0" x2="890.0" y2="250.0" class="grid"/><text x="80.0" y="250.0" class="t-s" text-anchor="end" dominant-baseline="central" >$20k</text><text x="290.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$20k</text><line x1="90.0" y1="180.0" x2="890.0" y2="180.0" class="grid"/><text x="80.0" y="180.0" class="t-s" text-anchor="end" dominant-baseline="central" >$40k</text><text x="490.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$40k</text><line x1="90.0" y1="110.0" x2="890.0" y2="110.0" class="grid"/><text x="80.0" y="110.0" class="t-s" text-anchor="end" dominant-baseline="central" >$60k</text><text x="690.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$60k</text><line x1="90.0" y1="40.0" x2="890.0" y2="40.0" class="grid"/><text x="80.0" y="40.0" class="t-s" text-anchor="end" dominant-baseline="central" >$80k</text><text x="890.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$80k</text><polygon points="90.0,320.0 480.0,183.5 90.0,183.5" class="area"/><text x="195.0" y="215.0" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >access の方が安い領域</text><text x="195.0" y="230.75" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >（未使用枠の失効分）</text><path d="M90.0,320.0 L890.0,40.0" class="ln-access"/><path d="M90.0,183.5 L480.0,183.5 L890.0,40.0" class="ln-ent"/><circle cx="480.0" cy="183.5" r="5" class="dot"/><text x="492.0" y="201.5" class="t-s" text-anchor="start" dominant-baseline="central" >利用額 $39k で一致。以降は同額</text><line x1="110" y1="34" x2="140" y2="34" class="ln-access"/><text x="148" y="34" class="t" text-anchor="start" dominant-baseline="central" >Copilot access（シート料$0・全量従量）</text><line x1="110" y1="58" x2="140" y2="58" class="ln-ent"/><text x="148" y="58" class="t" text-anchor="start" dominant-baseline="central" >Copilot Enterprise（$39×人数が最低額）</text><text x="490" y="362" class="t-s" text-anchor="middle" dominant-baseline="central" >月間の利用額（AIクレジット換算）</text><text x="24" y="180" class="t-s" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 24 180)">月額コスト</text><rect x="640" y="230" width="240" height="58" rx="8" class="s-amb" /><text x="760.0" y="249.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >access の上限は予算だけ</text><text x="760.0" y="268.375" class="t-s" text-anchor="middle" dominant-baseline="central" >予算未設定なら青天井（→4.6）</text></svg></div><figcaption>1クレジット＝$0.01と推定した試算。当社の契約単価はアカウントチームに要確認（→2.5）。</figcaption></figure>
+<h3 id="14-前提とする既存の取り組み本書の対象外">1.4 前提とする既存の取り組み（本書の対象外）</h3>
+<p>AIの有無にかかわらず必要な対策は、別途検討する次の取り組みで定義・実装する。本書はこれらが整備されていることを前提とし、内容は記載しない。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>取り組み</th>
+<th>主な範囲</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>DevSecOpsフレームワーク</strong></td>
+<td>Actionsの許可リスト・SHAピン留め、GITHUB_TOKENの権限、OIDC、Dependabot、SBOM、Artifact attestations、CIでの依存関係・シークレット・SAST検査</td>
+</tr>
+<tr>
+<td><strong>ランナーのEgress制御</strong></td>
+<td>自社ランナー（セルフホスト／ラージランナー）からの外部通信の制限</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>本書との分担</strong>：判断基準は「AIが新たに持ち込む、またはAIによって大きくなるリスクかどうか」。該当するものは本書、該当しないものは上記の取り組みで扱う。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>本書（AIガバナンス）</th>
+<th>DevSecOpsフレームワーク／ランナーのEgress制御</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>モデル、MCP・プラグインの入手元</td>
+<td>決定・設定（→4.3、4.5）</td>
+<td>―</td>
+</tr>
+<tr>
+<td>AIが提案する依存パッケージ</td>
+<td>レビュー基準として実在確認を定める（→第5章③）</td>
+<td>CIでの検査</td>
+</tr>
+<tr>
+<td>指示ファイル（AGENTS.md等）の保護</td>
+<td>CODEOWNERSの対象に指定（→4.2）</td>
+<td>フレームワークのリポジトリ構成に組み込み</td>
+</tr>
+<tr>
+<td>クラウドエージェントの外部通信</td>
+<td>要件を定める（→4.7）</td>
+<td>自社ランナーで動かす場合はEgress制御で実装</td>
+</tr>
+<tr>
+<td>エージェントが変更したワークフローの実行</td>
+<td>人の承認を必須とする（→4.7）</td>
+<td>―</td>
+</tr>
+<tr>
+<td>Actionsの許可リスト、SHAピン留め、Dependabot、SBOMなど</td>
+<td>対象外</td>
+<td>定義・実装</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図3</span><span class="fig-title">本書とDevSecOpsフレームワークの分担</span></div><div class="fig-scroll"><svg viewBox="0 0 960 360" role="img" aria-label="本書とDevSecOpsフレームワークの分担" style="min-width:680px"><rect x="20" y="16" width="290" height="40" rx="8" class="s-acc" /><text x="165" y="36" class="t t-b" text-anchor="middle" dominant-baseline="central" >本書：AIガバナンス</text><rect x="335" y="16" width="290" height="40" rx="8" class="s-amb" /><text x="480" y="36" class="t t-b" text-anchor="middle" dominant-baseline="central" >境界：要件と実装を分担</text><rect x="650" y="16" width="290" height="40" rx="8" class="s-gray" /><text x="795" y="36" class="t t-b" text-anchor="middle" dominant-baseline="central" >DevSecOpsフレームワーク／Egress制御</text><rect x="20" y="70" width="290" height="46" rx="8" class="s-box" /><text x="165.0" y="83.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >モデルの承認</text><text x="165.0" y="102.375" class="t-s" text-anchor="middle" dominant-baseline="central" >保持条件・代替モデル（→4.3）</text><rect x="20" y="126" width="290" height="46" rx="8" class="s-box" /><text x="165.0" y="139.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >MCP・プラグインの入手元</text><text x="165.0" y="158.375" class="t-s" text-anchor="middle" dominant-baseline="central" >プラグイン限定（→4.5）</text><rect x="20" y="182" width="290" height="46" rx="8" class="s-box" /><text x="165.0" y="195.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >エージェントの権限</text><text x="165.0" y="214.375" class="t-s" text-anchor="middle" dominant-baseline="central" >bypass禁止・サンドボックス</text><rect x="20" y="238" width="290" height="46" rx="8" class="s-box" /><text x="165.0" y="251.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AIのコスト</text><text x="165.0" y="270.375" class="t-s" text-anchor="middle" dominant-baseline="central" >多層予算（→4.6）</text><rect x="335" y="70" width="290" height="62" rx="8" class="s-box" /><text x="480.0" y="91.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AIが提案する依存パッケージ</text><text x="480.0" y="110.375" class="t-s" text-anchor="middle" dominant-baseline="central" >要件：実在確認の基準 ／ 実装：CI検査</text><rect x="335" y="145" width="290" height="62" rx="8" class="s-box" /><text x="480.0" y="166.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >指示ファイル（AGENTS.md等）</text><text x="480.0" y="185.375" class="t-s" text-anchor="middle" dominant-baseline="central" >要件：CODEOWNERS指定 ／ 実装：構成に組込み</text><rect x="335" y="220" width="290" height="62" rx="8" class="s-box" /><text x="480.0" y="241.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >クラウドエージェントの外部通信</text><text x="480.0" y="260.375" class="t-s" text-anchor="middle" dominant-baseline="central" >要件：許可先 ／ 実装：自社ランナーのEgress</text><rect x="650" y="70" width="290" height="46" rx="8" class="s-box" /><text x="795.0" y="83.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Actionsの許可リスト</text><text x="795.0" y="102.375" class="t-s" text-anchor="middle" dominant-baseline="central" >SHAピン留め</text><rect x="650" y="126" width="290" height="46" rx="8" class="s-box" /><text x="795.0" y="139.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >GITHUB_TOKENの権限</text><text x="795.0" y="158.375" class="t-s" text-anchor="middle" dominant-baseline="central" >OIDC</text><rect x="650" y="182" width="290" height="46" rx="8" class="s-box" /><text x="795.0" y="195.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Dependabot・SBOM</text><text x="795.0" y="214.375" class="t-s" text-anchor="middle" dominant-baseline="central" >Artifact attestations</text><rect x="650" y="238" width="290" height="46" rx="8" class="s-box" /><text x="795.0" y="251.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >CIのSAST・シークレット検査</text><text x="795.0" y="270.375" class="t-s" text-anchor="middle" dominant-baseline="central" >ランナーのEgress制御</text><rect x="20" y="302" width="920" height="44" rx="8" class="s-layer" /><text x="480.0" y="324.0" class="t" text-anchor="middle" dominant-baseline="central" >判断基準：AIが新たに持ち込む、またはAIで大きくなるリスクか？　Yes → 本書　／　No → DevSecOps側</text></svg></div><figcaption>境界にある3項目は「何を満たすか（要件）」を本書で定め、「どう実現するか（実装）」をDevSecOps側で持つ。</figcaption></figure>
+<hr />
+<h2 id="第2章-課題疑問の整理">第2章 課題・疑問の整理</h2>
+<h3 id="21-論点ツリー">2.1 論点ツリー</h3>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図4</span><span class="fig-title">論点ツリーと本書の該当箇所</span></div><div class="fig-scroll"><svg viewBox="0 0 960 470" role="img" aria-label="論点ツリー" style="min-width:680px"><defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="20" y="215" width="150" height="54" rx="8" class="s-acc" /><text x="95.0" y="232.25" class="t t-b" text-anchor="middle" dominant-baseline="central" >Copilot</text><text x="95.0" y="251.75" class="t t-b" text-anchor="middle" dominant-baseline="central" >AIガバナンス</text><path d="M170,242 L195,242 L195,142 L218,142" class="ln" marker-end="url(#ah4)"/><rect x="220" y="123" width="230" height="38" rx="8" class="s-acc" /><text x="335.0" y="142.0" class="t t-b" text-anchor="middle" dominant-baseline="central" >Q1 何を守るのか</text><path d="M170,242 L195,242 L195,300 L218,300" class="ln" marker-end="url(#ah4)"/><rect x="220" y="281" width="230" height="38" rx="8" class="s-box" /><text x="335.0" y="300.0" class="t t-b" text-anchor="middle" dominant-baseline="central" >Q2 強制とルールの線引き</text><text x="465" y="300" class="t-s" text-anchor="start" dominant-baseline="central" >→ 第3章・第4章・第5章</text><path d="M170,242 L195,242 L195,348 L218,348" class="ln" marker-end="url(#ah4)"/><rect x="220" y="329" width="230" height="38" rx="8" class="s-box" /><text x="335.0" y="348.0" class="t t-b" text-anchor="middle" dominant-baseline="central" >Q3 体制・責任分担</text><text x="465" y="348" class="t-s" text-anchor="start" dominant-baseline="central" >→ 3.2</text><path d="M170,242 L195,242 L195,396 L218,396" class="ln" marker-end="url(#ah4)"/><rect x="220" y="377" width="230" height="38" rx="8" class="s-box" /><text x="335.0" y="396.0" class="t t-b" text-anchor="middle" dominant-baseline="central" >Q4 開放の順序</text><text x="465" y="396" class="t-s" text-anchor="start" dominant-baseline="central" >→ 3.3</text><path d="M170,242 L195,242 L195,444 L218,444" class="ln" marker-end="url(#ah4)"/><rect x="220" y="425" width="230" height="38" rx="8" class="s-box" /><text x="335.0" y="444.0" class="t t-b" text-anchor="middle" dominant-baseline="central" >Q5 測定と見直し</text><text x="465" y="444" class="t-s" text-anchor="start" dominant-baseline="central" >→ 第7章</text><path d="M450,142 L475,142 L475,37 L498,37" class="ln" marker-end="url(#ah4)"/><rect x="500" y="20" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="37.0" class="t" text-anchor="middle" dominant-baseline="central" >a 機密情報・ソースコードの流出</text><text x="812" y="37" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.5・4.7 ／ R1・R13</text><path d="M450,142 L475,142 L475,79 L498,79" class="ln" marker-end="url(#ah4)"/><rect x="500" y="62" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="79.0" class="t" text-anchor="middle" dominant-baseline="central" >b 生成コードの品質・脆弱性</text><text x="812" y="79" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.2・4.8 ／ R2</text><path d="M450,142 L475,142 L475,121 L498,121" class="ln" marker-end="url(#ah4)"/><rect x="500" y="104" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="121.0" class="t" text-anchor="middle" dominant-baseline="central" >c 知的財産（ライセンス汚染）</text><text x="812" y="121" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.4 ／ R3</text><path d="M450,142 L475,142 L475,163 L498,163" class="ln" marker-end="url(#ah4)"/><rect x="500" y="146" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="163.0" class="t" text-anchor="middle" dominant-baseline="central" >d コスト（含有枠なし＝上限なし）</text><text x="812" y="163" class="t-s" text-anchor="start" dominant-baseline="central" >→ 1.3・4.6 ／ R8</text><path d="M450,142 L475,142 L475,205 L498,205" class="ln" marker-end="url(#ah4)"/><rect x="500" y="188" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="205.0" class="t" text-anchor="middle" dominant-baseline="central" >e 承認外AIへの迂回</text><text x="812" y="205" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.3〜4.5 ／ R7・R9・R12</text><path d="M450,142 L475,142 L475,247 L498,247" class="ln" marker-end="url(#ah4)"/><rect x="500" y="230" width="300" height="34" rx="8" class="s-box" /><text x="650.0" y="247.0" class="t" text-anchor="middle" dominant-baseline="central" >f 説明責任</text><text x="812" y="247" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.1・第7章 ／ R11</text></svg></div><figcaption>矢印の先は答えている章・節とリスク台帳のID（第6章）。文書との対応は2.2の表を参照。</figcaption></figure>
+<h3 id="22-各問いと本書の対応表">2.2 各問いと本書の対応表</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>問い</th>
+<th>答えている章・節</th>
+<th>主なGitHub設定</th>
+<th>関連リスク（第6章）</th>
+<th>関連文書（第5章）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Q1-a</strong> 機密情報の流出</td>
+<td>4.5、4.7、4.8</td>
+<td>コンテンツ除外、managed-settingsのdeny、ローカルサンドボックス、セッション同期の無効化</td>
+<td>R1、R13</td>
+<td>①②⑦</td>
+</tr>
+<tr>
+<td><strong>Q1-b</strong> コード品質・脆弱性</td>
+<td>4.2、4.8</td>
+<td>ルールセット（PR必須・Code Ownerレビュー）、Copilot code review、Dependabot</td>
+<td>R2</td>
+<td>③</td>
+</tr>
+<tr>
+<td><strong>Q1-c</strong> 知的財産</td>
+<td>4.4</td>
+<td>パブリックコード一致のブロック</td>
+<td>R3</td>
+<td>②③</td>
+</tr>
+<tr>
+<td><strong>Q1-d</strong> コスト</td>
+<td>1.3、4.6</td>
+<td>多層予算、上限到達時の停止</td>
+<td>R8</td>
+<td>⑤⑥</td>
+</tr>
+<tr>
+<td><strong>Q1-e</strong> 承認外AIへの迂回</td>
+<td>2.3、4.3、4.4、4.5</td>
+<td>新モデル既定無効、BYOK無効、strictPluginOnlyCustomization、全リポジトリでのブロック系ポリシー、EMU</td>
+<td>R7、R9、R12</td>
+<td>①④</td>
+</tr>
+<tr>
+<td><strong>Q1-f</strong> 説明責任</td>
+<td>4.1、第7章</td>
+<td>監査ログストリーミング、使用量メトリクスAPI</td>
+<td>R11</td>
+<td>⑤⑦</td>
+</tr>
+<tr>
+<td><strong>Q2</strong> 強制とルールの線引き</td>
+<td>第3章（方針2・3）、第4章全体、第5章</td>
+<td>第4章の「強制」欄</td>
+<td>全般</td>
+<td>①②</td>
+</tr>
+<tr>
+<td><strong>Q3</strong> 体制・責任分担</td>
+<td>3.2</td>
+<td>AIマネージャー用カスタムロール</td>
+<td>R11</td>
+<td>⑤⑥</td>
+</tr>
+<tr>
+<td><strong>Q4</strong> 開放の順序</td>
+<td>3.3</td>
+<td>エンタープライズチーム単位のシート割当、機能ポリシー</td>
+<td>R5</td>
+<td>②</td>
+</tr>
+<tr>
+<td><strong>Q5</strong> 測定と見直し</td>
+<td>第7章、3.3の各フェーズの移行条件</td>
+<td>使用量メトリクスAPI、予算アラート</td>
+<td>全般</td>
+<td>⑨⑩</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="23-github-enterpriseプラン特有の課題">2.3 GitHub Enterpriseプラン特有の課題</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>課題</th>
+<th>問題になる理由</th>
+<th>対応（参照先）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E1</td>
+<td>含有クレジットがなく全量従量</td>
+<td>シート料という上限がなく、予算設定が唯一の歯止めになる</td>
+<td>予算を多層化し、上限到達時の停止を必須にする（→4.6）</td>
+</tr>
+<tr>
+<td>E2</td>
+<td>シート割当が必要</td>
+<td>「Enterpriseに含まれる＝全員が自動で使える」ではない</td>
+<td>IdP同期のエンタープライズチームで割当。GitHub AppによるAPI自動化（→4.1）</td>
+</tr>
+<tr>
+<td>E3</td>
+<td>他のCopilotプランと混在不可</td>
+<td>組織単位の段階移行ができない</td>
+<td>移行はエンタープライズ単位で一括判断（→2.4 D1）</td>
+</tr>
+<tr>
+<td>E4</td>
+<td>アカウントチーム経由のみ</td>
+<td>セルフサービス契約では現時点で利用不可</td>
+<td>契約形態の確認を最初のアクションにする（→第8章）</td>
+</tr>
+<tr>
+<td>E5</td>
+<td>接続先がEnterpriseエンドポイントに切り替わる</td>
+<td>FWが<code>*.business.githubcopilot.com</code>のみ許可だと利用が止まる</td>
+<td>許可リストに<code>*.enterprise.githubcopilot.com</code>を追加（→4.1）</td>
+</tr>
+<tr>
+<td>E6</td>
+<td>Copilot Enterprise相当の全機能が対象</td>
+<td>統制対象の機能が多い</td>
+<td>既定で無効にし、段階的に開放（→3.3、4.4）</td>
+</tr>
+<tr>
+<td>E7</td>
+<td>通常のポリシーが及ぶのは自社付与のシートのみ</td>
+<td>個人プラン利用者や、別アカウントでリポジトリを扱う経路が残る</td>
+<td>全リポジトリでブロックするポリシー、EMU、利用規程（→4.4、第5章①）</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="24-未決事項社内で決める必要があることと推奨案">2.4 未決事項（社内で決める必要があること）と推奨案</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>未決事項</th>
+<th>推奨案と理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Copilot accessとCopilot Enterpriseのどちらにするか</td>
+<td><strong>Copilot accessを推奨（条件付き）</strong>。単価が同じなら常に同等以下のコスト（→1.3）。条件は、予算を多層で設定できることと、アカウントチーム経由で契約できること</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>承認モデルの範囲</td>
+<td>社内承認済みAIのベンダー系に限定。新モデルと代替モデルは手動承認。Fusionもこの範囲に限定</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>データ保持が必要なモデル（例：Claude Fable 5.2）を許可するか</td>
+<td>法務がデータ保持条件を確認するまで<strong>無効のまま</strong>（既定オフを維持）</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>BYOK（個人キー・ローカルモデル）を許可するか</td>
+<td><strong>禁止</strong>。承認外プロバイダへの経路になり、ローカルモデルは安全保護が異なる</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>エージェント機能の開放範囲</td>
+<td>段階開放。IDEエージェントモード→CLI／Copilot app→クラウドエージェント（対象リポジトリ限定）</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>MCP・スキル・カスタムエージェントの配布方法</td>
+<td><strong>プラグイン経由に限定</strong>（strictPluginOnlyCustomization）し、社内マーケットプレイスで配布</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>ローカルセッションのクラウド同期</td>
+<td>初期は無効。保持・閲覧範囲を法務が確認してから判断</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>予算の水準</td>
+<td>パイロット実測の中央値の2〜3倍をユーザー上限にする。全体予算は月次見積り＋20%程度</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>GHASの導入</td>
+<td>予算がつくなら、機密度の高いリポジトリからSecret Protectionを優先導入。導入しない場合は4.8の代替策</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="25-githubアカウントチームへの確認事項">2.5 GitHub・アカウントチームへの確認事項</h3>
+<ol>
+<li>当社の契約でCopilot accessを利用できるか。移行可能な最短の月初日。</li>
+<li>当社のAIクレジット単価と割引条件。</li>
+<li>surfaceごとのプロンプト・応答・セッションの保持期間。データ保持が必要なモデルの具体的な条件。</li>
+<li>移行後も既存のポリシー・予算・managed-settingsが引き継がれるか。</li>
+<li>個人プラン利用者と、Copilot appの「ライセンスとリポジトリで別アカウント」機能を、EMU以外の方法で統制できる範囲。</li>
+<li>managed-settingsの各キーが、どのクライアント（VS Code、JetBrains、CLI、Copilot app、クラウドエージェント）で強制されるか。</li>
+</ol>
+<hr />
+<h2 id="第3章-基本方針と段階導入">第3章 基本方針と段階導入</h2>
+<h3 id="31-基本方針">3.1 基本方針</h3>
+<ol>
+<li><strong>既定は閉じ、承認したものだけ開ける</strong>：新機能・新モデル・代替モデルを自動で有効化させない。</li>
+<li><strong>技術で強制できるものは強制する</strong>：モデル、BYOK、カスタマイズの配布元、エージェント権限、ネットワーク、ブランチ保護、予算は設定で担保する。</li>
+<li><strong>ルールは短く、ユーザー責任の「標準」に絞る</strong>：開発者が読む文書は3本に限定する（→第5章）。</li>
+<li><strong>エージェントは別リスクとして段階開放する</strong>。</li>
+<li><strong>コストは予算で物理的に止める</strong>。</li>
+</ol>
+<h3 id="32-体制raciの要点">3.2 体制（RACIの要点）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>活動</th>
+<th>説明責任</th>
+<th>実行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ポリシー策定・モデル／機能の承認</td>
+<td>AIガバナンス委員会（議長：CISO）</td>
+<td>AIマネージャー</td>
+</tr>
+<tr>
+<td>AI Controls・managed-settings・予算の設定</td>
+<td>AIマネージャー</td>
+<td>AIマネージャー</td>
+</tr>
+<tr>
+<td>ルールセット・ブランチ保護</td>
+<td>Enterprise Owner</td>
+<td>Org Owner、リポジトリ管理者</td>
+</tr>
+<tr>
+<td>MCP・プラグインの審査</td>
+<td>セキュリティ</td>
+<td>AIマネージャー</td>
+</tr>
+<tr>
+<td>AI生成コードのレビュー</td>
+<td>リポジトリ管理者</td>
+<td>開発者</td>
+</tr>
+<tr>
+<td>インシデント対応</td>
+<td>セキュリティ</td>
+<td>AIマネージャー</td>
+</tr>
+</tbody>
+</table></div>
+<p>AIマネージャーには、Enterprise Ownerの代わりに、AI Controlsの管理・監査ログ閲覧・メトリクス閲覧の権限を持つカスタムロールを付与する（前版）。</p>
+<h3 id="33-段階導入規模に応じて比率で設定">3.3 段階導入（規模に応じて比率で設定）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>フェーズ</th>
+<th>期間目安</th>
+<th>対象</th>
+<th>開放する機能</th>
+<th>次へ進む条件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0 基盤</td>
+<td>1〜2か月</td>
+<td>管理者</td>
+<td>契約、ネットワーク、EMU／IdP、AI Controlsの既定値、予算、監査ログ、ルールセット、managed-settings</td>
+<td>第4章のチェックリストを完了</td>
+</tr>
+<tr>
+<td>1 パイロット</td>
+<td>2〜3か月</td>
+<td>全体の<strong>5〜10%</strong>（複数部門、若手とベテランを混在）</td>
+<td>IDE補完、IDEチャット、github.comチャット、code review</td>
+<td>品質指標の悪化なし、コスト実測値の取得</td>
+</tr>
+<tr>
+<td>2 拡大</td>
+<td>2〜4か月</td>
+<td>全体の<strong>30〜50%</strong></td>
+<td>＋IDEエージェントモード（bypass禁止、ローカルサンドボックス有効）</td>
+<td>教育修了率95%以上、予算内</td>
+</tr>
+<tr>
+<td>3 全社</td>
+<td>以降</td>
+<td>全員</td>
+<td>＋承認済みプラグイン（MCP含む）、CLI／Copilot app（希望チーム）</td>
+<td>四半期レビューで承認</td>
+</tr>
+<tr>
+<td>4 エージェント拡張</td>
+<td>個別</td>
+<td>選定チーム</td>
+<td>クラウドエージェント（対象リポジトリ限定）、自動化</td>
+<td>個別のリスク評価で承認</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図5</span><span class="fig-title">段階導入ロードマップ</span></div><div class="fig-scroll"><svg viewBox="0 0 960 300" role="img" aria-label="段階導入ロードマップ" style="min-width:760px"><polygon points="8,20 172,20 190,53.0 172,86 8,86 8,53.0" class="s-gray"/><text x="103.0" y="43" class="t t-b" text-anchor="middle" dominant-baseline="central" >フェーズ0 基盤</text><text x="103.0" y="65" class="t-s" text-anchor="middle" dominant-baseline="central" >管理者のみ</text><rect x="11" y="100" width="176" height="190" rx="8" class="s-box" /><text x="23" y="124" class="t" text-anchor="start" dominant-baseline="central" >・契約・ネットワーク</text><text x="23" y="145" class="t" text-anchor="start" dominant-baseline="central" >・EMU・IdP</text><text x="23" y="166" class="t" text-anchor="start" dominant-baseline="central" >・AI Controls既定値</text><text x="23" y="187" class="t" text-anchor="start" dominant-baseline="central" >・予算・監査ログ</text><text x="23" y="208" class="t" text-anchor="start" dominant-baseline="central" >・ルールセット</text><line x1="21" y1="236" x2="177" y2="236" class="grid"/><text x="23" y="250" class="t-s t-b" text-anchor="start" dominant-baseline="central" >次へ進む条件</text><text x="23" y="268" class="t-s" text-anchor="start" dominant-baseline="central" >チェックリスト完了</text><polygon points="196,20 360,20 378,53.0 360,86 196,86 214,53.0" class="s-acc"/><text x="291.0" y="43" class="t t-b" text-anchor="middle" dominant-baseline="central" >フェーズ1 パイロット</text><text x="291.0" y="65" class="t-s" text-anchor="middle" dominant-baseline="central" >全体の5〜10%</text><rect x="199" y="100" width="176" height="190" rx="8" class="s-box" /><text x="211" y="124" class="t" text-anchor="start" dominant-baseline="central" >・IDE補完・チャット</text><text x="211" y="145" class="t" text-anchor="start" dominant-baseline="central" >・github.comチャット</text><text x="211" y="166" class="t" text-anchor="start" dominant-baseline="central" >・code review</text><line x1="209" y1="236" x2="365" y2="236" class="grid"/><text x="211" y="250" class="t-s t-b" text-anchor="start" dominant-baseline="central" >次へ進む条件</text><text x="211" y="268" class="t-s" text-anchor="start" dominant-baseline="central" >品質悪化なし</text><text x="211" y="286" class="t-s" text-anchor="start" dominant-baseline="central" >コスト実測</text><polygon points="384,20 548,20 566,53.0 548,86 384,86 402,53.0" class="s-acc"/><text x="479.0" y="43" class="t t-b" text-anchor="middle" dominant-baseline="central" >フェーズ2 拡大</text><text x="479.0" y="65" class="t-s" text-anchor="middle" dominant-baseline="central" >全体の30〜50%</text><rect x="387" y="100" width="176" height="190" rx="8" class="s-box" /><text x="399" y="124" class="t" text-anchor="start" dominant-baseline="central" >・＋IDEエージェント</text><text x="399" y="145" class="t" text-anchor="start" dominant-baseline="central" >・bypass禁止</text><text x="399" y="166" class="t" text-anchor="start" dominant-baseline="central" >・サンドボックス有効</text><line x1="397" y1="236" x2="553" y2="236" class="grid"/><text x="399" y="250" class="t-s t-b" text-anchor="start" dominant-baseline="central" >次へ進む条件</text><text x="399" y="268" class="t-s" text-anchor="start" dominant-baseline="central" >教育修了95%</text><text x="399" y="286" class="t-s" text-anchor="start" dominant-baseline="central" >予算内</text><polygon points="572,20 736,20 754,53.0 736,86 572,86 590,53.0" class="s-acc"/><text x="667.0" y="43" class="t t-b" text-anchor="middle" dominant-baseline="central" >フェーズ3 全社</text><text x="667.0" y="65" class="t-s" text-anchor="middle" dominant-baseline="central" >全員</text><rect x="575" y="100" width="176" height="190" rx="8" class="s-box" /><text x="587" y="124" class="t" text-anchor="start" dominant-baseline="central" >・＋承認済みプラグイン</text><text x="587" y="145" class="t" text-anchor="start" dominant-baseline="central" >・＋CLI・Copilot app</text><text x="587" y="166" class="t" text-anchor="start" dominant-baseline="central" >　（希望チーム）</text><line x1="585" y1="236" x2="741" y2="236" class="grid"/><text x="587" y="250" class="t-s t-b" text-anchor="start" dominant-baseline="central" >次へ進む条件</text><text x="587" y="268" class="t-s" text-anchor="start" dominant-baseline="central" >四半期レビュー</text><polygon points="760,20 924,20 942,53.0 924,86 760,86 778,53.0" class="s-amb"/><text x="855.0" y="43" class="t t-b" text-anchor="middle" dominant-baseline="central" >フェーズ4 拡張</text><text x="855.0" y="65" class="t-s" text-anchor="middle" dominant-baseline="central" >選定チーム</text><rect x="763" y="100" width="176" height="190" rx="8" class="s-box" /><text x="775" y="124" class="t" text-anchor="start" dominant-baseline="central" >・クラウドエージェント</text><text x="775" y="145" class="t" text-anchor="start" dominant-baseline="central" >　（対象リポジトリ限定）</text><text x="775" y="166" class="t" text-anchor="start" dominant-baseline="central" >・自動化</text><line x1="773" y1="236" x2="929" y2="236" class="grid"/><text x="775" y="250" class="t-s t-b" text-anchor="start" dominant-baseline="central" >次へ進む条件</text><text x="775" y="268" class="t-s" text-anchor="start" dominant-baseline="central" >個別リスク評価</text></svg></div><figcaption>エージェント系（CLI・Copilot app・クラウドエージェント）は、ガードレールを整えてから後段で開放する。</figcaption></figure>
+<hr />
+<h2 id="第4章-必要なgithub設定">第4章 必要なGitHub設定</h2>
+<p>凡例：「GHAS」欄の「不要」は追加ライセンス不要、「SP」はSecret Protection、「CS」はCode Securityが必要という意味です。</p>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図6</span><span class="fig-title">どの層で何を制御するか</span></div><div class="fig-scroll"><svg viewBox="0 0 960 356" role="img" aria-label="統制レイヤー" style="min-width:820px"><defs><marker id="ah6" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="44" y="20" width="220" height="54" rx="8" class="s-gray" /><text x="154.0" y="37.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >ID・アクセス</text><text x="154.0" y="56.375" class="t-s" text-anchor="middle" dominant-baseline="central" >→4.1</text><rect x="272" y="20" width="668" height="54" rx="8" class="s-box" /><text x="288" y="47" class="t" text-anchor="start" dominant-baseline="central" >EMU ／ SSO・SCIM（OIDC） ／ IP許可リスト ／ ネットワーク許可リスト ／ 監査ログ</text><rect x="44" y="84" width="220" height="54" rx="8" class="s-acc" /><text x="154.0" y="101.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Enterprise：AI Controls</text><text x="154.0" y="120.375" class="t-s" text-anchor="middle" dominant-baseline="central" >→4.3・4.4・4.6</text><rect x="272" y="84" width="668" height="54" rx="8" class="s-box" /><text x="288" y="111" class="t" text-anchor="start" dominant-baseline="central" >承認モデルのみ ／ 新モデル・新機能は既定無効 ／ BYOK無効 ／ ブロック系ポリシー ／ 予算</text><rect x="44" y="148" width="220" height="54" rx="8" class="s-acc" /><text x="154.0" y="165.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Enterprise：managed-settings</text><text x="154.0" y="184.375" class="t-s" text-anchor="middle" dominant-baseline="central" >→4.5</text><rect x="272" y="148" width="668" height="54" rx="8" class="s-box" /><text x="288" y="175" class="t" text-anchor="start" dominant-baseline="central" >権限deny・bypass禁止 ／ プラグイン限定 ／ MCP許可リスト ／ ローカルサンドボックス</text><rect x="44" y="212" width="220" height="54" rx="8" class="s-grn" /><text x="154.0" y="229.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Organization</text><text x="154.0" y="248.375" class="t-s" text-anchor="middle" dominant-baseline="central" >→4.7</text><rect x="272" y="212" width="668" height="54" rx="8" class="s-box" /><text x="288" y="239" class="t" text-anchor="start" dominant-baseline="central" >コンテンツ除外 ／ クラウドエージェントのファイアウォール ／ 組織カスタム指示 ／ 対象リポジトリ</text><rect x="44" y="276" width="220" height="54" rx="8" class="s-amb" /><text x="154.0" y="293.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >Repository</text><text x="154.0" y="312.375" class="t-s" text-anchor="middle" dominant-baseline="central" >→4.2</text><rect x="272" y="276" width="668" height="54" rx="8" class="s-box" /><text x="288" y="303" class="t" text-anchor="start" dominant-baseline="central" >ルールセット（PR必須・Code Ownerレビュー） ／ CODEOWNERS ／ カスタムプロパティ</text><path d="M22,24 L22,330" class="ln" marker-end="url(#ah6)"/><text x="22" y="14" class="t-s" text-anchor="middle" dominant-baseline="central" >上位</text><text x="22" y="346" class="t-s" text-anchor="middle" dominant-baseline="central" >下位</text></svg></div><figcaption>Enterpriseで固定した設定は、組織・リポジトリ側で上書きできない。上位で閉じ、必要な範囲だけ下位に委ねる。</figcaption></figure>
+<h3 id="41-契約ライセンスid">4.1 契約・ライセンス・ID</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>理由</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>課金モデル</td>
+<td>Copilot access（エンタープライズ単位で一括移行）</td>
+<td>2.4 D1</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>Copilotシート割当</td>
+<td>IdP同期のエンタープライズチーム単位。フェーズごとにチームを拡大</td>
+<td>自動付与されないため、申請なしで管理できる方式にする</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>シート割当の自動化</td>
+<td>エンタープライズのGitHub App（権限：Enterprise Copilot license management）でシート管理APIを呼ぶ</td>
+<td>個人のPATに依存しない自動化</td>
+<td>公式（11/10）</td>
+</tr>
+<tr>
+<td>EMU</td>
+<td>採用（既存環境なら移行計画を検討）</td>
+<td>個人アカウント混在による迂回と流出を構造的に防ぐ</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>SSO／SCIM</td>
+<td>OIDC（Entra ID）＋条件付きアクセス</td>
+<td>退職者の即時無効化。OIDCならCopilot CLIのEntraサインイン（プレビュー）も利用できる</td>
+<td>前版／公式（11/17）</td>
+</tr>
+<tr>
+<td>IP許可リスト</td>
+<td>社内・VPNのみ</td>
+<td>端末外からのアクセス制限</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>ネットワーク許可リスト</td>
+<td><code>*.enterprise.githubcopilot.com</code>を許可</td>
+<td>Copilot accessはEnterpriseエンドポイントを使う</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>監査ログ</td>
+<td>SIEMへストリーミング</td>
+<td>エージェント操作の追跡</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="42-リポジトリルールセット">4.2 リポジトリ・ルールセット</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>リポジトリ作成</td>
+<td>Privateのみ許可</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>可視性の変更・削除・移管</td>
+<td>Enterprise Owner／Org Ownerのみ</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>フォーク</td>
+<td>同一組織内のみ、または禁止</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>ユーザー名前空間リポジトリ（EMU）</td>
+<td>作成禁止</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>Enterpriseルールセット（デフォルトブランチ）</td>
+<td>削除禁止、force push禁止、PR必須（承認1名以上、Code Ownerレビュー必須、古い承認の破棄）、ステータスチェック必須</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>CODEOWNERS</td>
+<td><code>.github/workflows/</code>、<code>.github/copilot-instructions.md</code>、<code>AGENTS.md</code>、<code>.github/agents/</code>、<code>copilot-setup-steps.yml</code>をプラットフォームチームの所有にする</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>カスタムプロパティ</td>
+<td><code>data_classification</code>、<code>copilot_agent_allowed</code>、<code>criticality</code></td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="43-ai-controlsモデル">4.3 AI Controls：モデル</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>理由</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>リリース済みモデルの既定有効化（グローバル既定）</td>
+<td><strong>無効</strong></td>
+<td>新モデルだけでなく、<strong>モデル廃止時の代替モデルも自動で有効化される</strong>ため</td>
+<td>公式（11/16）</td>
+</tr>
+<tr>
+<td>個別モデルポリシー</td>
+<td>承認ベンダー系のみ有効</td>
+<td>2.4 D2</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>データ保持が必要なモデル（例：Claude Fable 5.2）</td>
+<td><strong>無効のまま</strong>（既定オフ）</td>
+<td>2.4 D3</td>
+<td>公式（11/16）</td>
+</tr>
+<tr>
+<td>Copilot Fusion</td>
+<td>使う場合も、Fusionが選べるモデルから承認外モデルを除外する</td>
+<td>自動ルーティングでも承認範囲を超えないようにする</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>Fusionのローカルモデル選択</td>
+<td>使用しない</td>
+<td>実験的機能で、安全保護が異なる</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>BYOK（VS Code等の個人キー・ローカルモデル）</td>
+<td><strong>無効</strong>（既定は有効）</td>
+<td>承認外プロバイダへの経路</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>Enterprise BYOK（カスタムモデル）</td>
+<td>無効（パブリックプレビュー）</td>
+<td>必要時に個別評価</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>モデルポリシーのAPI管理</td>
+<td>APIでIaC化し、週次で差分を検知</td>
+<td>ドリフト防止</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="44-ai-controls機能エージェント">4.4 AI Controls：機能・エージェント</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>理由</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>新機能の既定ポリシー</td>
+<td>無効</td>
+<td>新機能の自動有効化を防ぐ</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>パブリックコードに一致する提案</td>
+<td>ブロック</td>
+<td>ライセンス汚染の防止</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>Copilot CLI</td>
+<td>フェーズ3まで無効。開放は希望チームのみ</td>
+<td>シェル実行を伴う。Copilot appの利用にも必要</td>
+<td>公式／前版</td>
+</tr>
+<tr>
+<td>GitHub Copilot app</td>
+<td>CLIと同時期まで無効</td>
+<td>エージェントセッション、ブラウザ操作を伴う</td>
+<td>前版／二次</td>
+</tr>
+<tr>
+<td>Copilot appの「ライセンスとリポジトリで別アカウント」</td>
+<td>利用規程で<strong>社外アカウントのリポジトリでの利用を禁止</strong>（技術的な制御可否は2.5-5で確認）</td>
+<td>会社のライセンスが社外リポジトリに使われる経路</td>
+<td>公式（機能の存在）</td>
+</tr>
+<tr>
+<td>Copilot in the cloud（クラウドエージェント）</td>
+<td>フェーズ4まで無効</td>
+<td>自律実行</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>Copilot cloud agentを全リポジトリでブロック</td>
+<td>フェーズ4まで有効</td>
+<td>個人プランや他エンタープライズのユーザーも含めて遮断</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>Copilot code review</td>
+<td>フェーズ1から有効（予算設定後）。設定はAPIで管理し、Enterpriseで固定する</td>
+<td>Enterpriseが管理する設定は下位で上書きできない</td>
+<td>公式（11/06）</td>
+</tr>
+<tr>
+<td>外部ライセンスによるレビュー依頼のブロック</td>
+<td>有効</td>
+<td>自社が支払わないレビューを混在させない</td>
+<td>公式（11/06）</td>
+</tr>
+<tr>
+<td>サードパーティエージェント／Agent apps</td>
+<td>無効</td>
+<td>承認外AIの経路を閉じる</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>Store local sessions in the Cloud</td>
+<td>初期は無効</td>
+<td>同期データの保持・閲覧範囲が確認できるまで</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>Copilot Memory、Spaces、Web検索、Connectors</td>
+<td>初期は無効、個別評価</td>
+<td>情報の持続・外部送信を伴う</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>プレビュー機能</td>
+<td>無効（パイロット群のみ評価）</td>
+<td>プレリリース条項</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>AI credits paid usage</td>
+<td><strong>有効のまま</strong></td>
+<td>Copilot accessでは無効だとクレジット消費機能が使えない</td>
+<td>公式</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="45-managed-settingsgithub-privateリポジトリのcopilotmanaged-settingsjson">4.5 managed-settings（<code>.github-private</code>リポジトリの<code>copilot/managed-settings.json</code>）</h3>
+<pre><code class="language-json">{
+  &quot;permissions&quot;: {
+    &quot;disableBypassPermissionsMode&quot;: &quot;disable&quot;,
+    &quot;deny&quot;: [
+      &quot;Read(./.env)&quot;,
+      &quot;Shell(git push --force *)&quot;,
+      &quot;Shell(rm -rf *)&quot;,
+      &quot;Shell(terraform destroy *)&quot;
+    ]
+  },
+  &quot;strictPluginOnlyCustomization&quot;: [&quot;mcpServers&quot;, &quot;extensions&quot;, &quot;hooks&quot;],
+  &quot;allowedMcpServers&quot;: [
+    { &quot;serverUrl&quot;: &quot;https://mcp.internal.example.co.jp/*&quot; }
+  ],
+  &quot;deniedMcpServers&quot;: [],
+  &quot;forceRemoteSettingsRefresh&quot;: true
+}
+</code></pre>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>項目</th>
+<th>内容</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>strictPluginOnlyCustomization</td>
+<td>スキル、カスタムエージェント、フック、MCPサーバー、拡張機能の5分類から選んで、ユーザー・プロジェクト単位の独自設定を遮断し、プラグインまたはmanaged settings由来のみ許可する。<strong>エンタープライズ管理のプラグインのみという意味ではなく、マーケットプレイスの許可リストでもない</strong>ため、マーケットプレイス制限と組み合わせる</td>
+<td>公式（11/16）</td>
+</tr>
+<tr>
+<td>値の書式</td>
+<td>上記JSONの配列表記は例示。正式なキー値・書式は公式リファレンスで確認すること</td>
+<td>―</td>
+</tr>
+<tr>
+<td>チーム単位のカスタマイズ</td>
+<td>チームメンテナーがチームのマーケットプレイスからプラグインを選ぶと、メンバーに既定で有効になる。エンタープライズ／組織の制御は上書きされない。<strong>チームメンテナーへの教育と、マーケットプレイス制限の併用が必要</strong></td>
+<td>二次（11/18）</td>
+</tr>
+<tr>
+<td>ローカルサンドボックス</td>
+<td>エージェントのファイル・ネットワーク・資格情報へのアクセスを制限する。CLI、Copilot app、VS Code（Agent Host）でGA、追加費用なし。フェーズ2以降は<strong>有効化を標準</strong>にする</td>
+<td>公式（10/09）</td>
+</tr>
+<tr>
+<td>その他のキー（permissions、allowedMcpServers等）</td>
+<td><code>allowedMcpServers</code>が未設定なら全許可、空配列なら全ブロック、<code>deniedMcpServers</code>が常に優先</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="46-予算copilot-accessでは最重要">4.6 予算（Copilot accessでは最重要）</h3>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図7</span><span class="fig-title">予算の多層構造</span></div><div class="fig-scroll"><svg viewBox="0 0 960 300" role="img" aria-label="予算の多層構造" style="min-width:680px"><rect x="20" y="20" width="600" height="270" rx="8" class="s-layer-acc" /><text x="38" y="42" class="t t-b t-acc" text-anchor="start" dominant-baseline="central" >エンタープライズ予算</text><rect x="40" y="60" width="270" height="214" rx="8" class="s-grn" /><text x="56" y="82" class="t t-b" text-anchor="start" dominant-baseline="central" >コストセンター／組織の予算（部門A）</text><rect x="58" y="100" width="234" height="158" rx="8" class="s-box" /><text x="175" y="120" class="t t-b" text-anchor="middle" dominant-baseline="central" >ユーザー単位の上限</text><circle cx="115" cy="164" r="9" class="s-acc"/><path d="M99,196 Q115,172 131,196 Z" class="s-acc"/><circle cx="175" cy="164" r="9" class="s-acc"/><path d="M159,196 Q175,172 191,196 Z" class="s-acc"/><circle cx="235" cy="164" r="9" class="s-acc"/><path d="M219,196 Q235,172 251,196 Z" class="s-acc"/><text x="175" y="228" class="t-s" text-anchor="middle" dominant-baseline="central" >共通上限 または 部門別上限</text><text x="175" y="246" class="t-s" text-anchor="middle" dominant-baseline="central" >到達した人だけ停止</text><rect x="330" y="60" width="270" height="214" rx="8" class="s-grn" /><text x="346" y="82" class="t t-b" text-anchor="start" dominant-baseline="central" >コストセンター／組織の予算（部門B）</text><rect x="348" y="100" width="234" height="158" rx="8" class="s-box" /><text x="465" y="120" class="t t-b" text-anchor="middle" dominant-baseline="central" >ユーザー単位の上限</text><circle cx="405" cy="164" r="9" class="s-acc"/><path d="M389,196 Q405,172 421,196 Z" class="s-acc"/><circle cx="465" cy="164" r="9" class="s-acc"/><path d="M449,196 Q465,172 481,196 Z" class="s-acc"/><circle cx="525" cy="164" r="9" class="s-acc"/><path d="M509,196 Q525,172 541,196 Z" class="s-acc"/><text x="465" y="228" class="t-s" text-anchor="middle" dominant-baseline="central" >共通上限 または 部門別上限</text><text x="465" y="246" class="t-s" text-anchor="middle" dominant-baseline="central" >到達した人だけ停止</text><rect x="645" y="24" width="295" height="76" rx="8" class="s-amb" /><text x="792.5" y="43.25" class="t t-b" text-anchor="middle" dominant-baseline="central" >どの層でも上限到達で停止</text><text x="792.5" y="62.0" class="t-s" text-anchor="middle" dominant-baseline="central" >「上限到達時に利用を停止」を</text><text x="792.5" y="80.75" class="t-s" text-anchor="middle" dominant-baseline="central" >必ず有効化（既定はオフ）</text><rect x="645" y="116" width="295" height="66" rx="8" class="s-box" /><text x="792.5" y="139.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >例外は個別ユーザー上限</text><text x="792.5" y="158.375" class="t-s" text-anchor="middle" dominant-baseline="central" >有効期限付きで付与（→第5章⑥）</text><rect x="645" y="198" width="295" height="66" rx="8" class="s-box" /><text x="792.5" y="221.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >アラート 50%／75%／90%</text><text x="792.5" y="240.375" class="t-s" text-anchor="middle" dominant-baseline="central" >予算申請で例外を受け付け</text></svg></div><figcaption>ユーザー上限で個人の使いすぎを止め、部門・全体の予算で総額を止める。Copilot accessではこれが唯一の上限。</figcaption></figure>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ユーザー単位の共通上限</td>
+<td>パイロット実測の中央値の2〜3倍。到達時は課金機能が停止</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>コストセンター単位のユーザー上限</td>
+<td>部門ごとに設定</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>個別ユーザー上限</td>
+<td>例外時のみ、有効期限付き</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>コストセンター／組織／エンタープライズ予算</td>
+<td>設定し、<strong>上限到達時の利用停止を必ず有効化</strong>（既定はオフ）</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>予算申請</td>
+<td>例外申請の窓口として利用</td>
+<td>公式（機能の存在）</td>
+</tr>
+<tr>
+<td>コストセンターの確認</td>
+<td>REST APIでリソースの所属コストセンターを照会し、割当漏れを検知</td>
+<td>公式（11/03）</td>
+</tr>
+<tr>
+<td>アラート</td>
+<td>50%／75%／90%で通知</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="47-組織コンテンツ除外クラウドエージェント">4.7 組織：コンテンツ除外・クラウドエージェント</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>設定</th>
+<th>推奨値</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>コンテンツ除外</td>
+<td><code>**/.env*</code>、<code>**/secrets/**</code>、<code>**/*.pem</code>、<code>**/*.key</code>、顧客データのサンプル等</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>コンテンツ除外の位置付け</td>
+<td>IDE・CLI・Copilot app・クラウドのチャット／エージェントにも適用される。ただし間接的なアクセスは検知できない場合があり、シンボリックリンクとリモートファイルシステムは対象外。<strong>OS権限・アクセス制御の代替にはならない</strong></td>
+<td>公式</td>
+</tr>
+<tr>
+<td>組織カスタム指示</td>
+<td>セキュアコーディング規約の要点、ハードコード禁止など</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>クラウドエージェントのファイアウォール</td>
+<td>組織で有効を強制、リポジトリ側の独自ルールは不許可</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>クラウドエージェントの実行ランナー</td>
+<td>GitHubホストのランナーで動かす場合は上記ファイアウォールで外部通信を制限する。<strong>自社ランナーで動かす場合は、ランナーのEgress制御（→1.4）が外部通信制限の主体になる</strong>ため、許可する通信先の要件を本書で定め、Egress制御側で実装する。どちらで止めるかを対象リポジトリごとに明確にし、穴や二重管理を作らない</td>
+<td>二次（自社ランナー構成時の挙動は導入時に公式Docsで確認）</td>
+</tr>
+<tr>
+<td>クラウドエージェントのワークフロー実行</td>
+<td>承認必須を維持</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>copilot環境のシークレット</td>
+<td>原則登録しない</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>クラウドセッションの共有</td>
+<td>Actions上のセッションはリポジトリ閲覧者に既定で共有される。利用規程で周知し、高機密リポジトリは対象外にする</td>
+<td>公式</td>
+</tr>
+<tr>
+<td>対象リポジトリ</td>
+<td><code>copilot_agent_allowed=true</code>のリポジトリのみ</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図8</span><span class="fig-title">エージェント利用時の多層の関門</span></div><div class="fig-scroll"><svg viewBox="0 0 960 330" role="img" aria-label="エージェント利用時の多層の関門" style="min-width:820px"><defs><marker id="ah7" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="10" y="64" width="80" height="120" rx="8" class="s-layer" /><text x="50.0" y="114.25" class="t t-b" text-anchor="middle" dominant-baseline="central" >開発者</text><text x="50.0" y="133.75" class="t-s" text-anchor="middle" dominant-baseline="central" >依頼・指示</text><rect x="108" y="20" width="177" height="48" rx="8" class="s-acc" /><text x="196" y="36" class="t-s t-acc t-b" text-anchor="middle" dominant-baseline="central" >関門1</text><text x="196" y="54" class="t t-b" text-anchor="middle" dominant-baseline="central" >クライアント</text><rect x="108" y="68" width="177" height="196" rx="8" class="s-box" /><text x="120" y="92" class="t" text-anchor="start" dominant-baseline="central" >・コンテンツ除外</text><text x="120" y="117" class="t" text-anchor="start" dominant-baseline="central" >・権限deny・bypass禁止</text><text x="120" y="142" class="t" text-anchor="start" dominant-baseline="central" >・ローカルサンドボックス</text><text x="120" y="167" class="t" text-anchor="start" dominant-baseline="central" >・セッション同期の無効化</text><text x="120" y="248" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.5・4.7</text><rect x="303" y="20" width="177" height="48" rx="8" class="s-acc" /><text x="391" y="36" class="t-s t-acc t-b" text-anchor="middle" dominant-baseline="central" >関門2</text><text x="391" y="54" class="t t-b" text-anchor="middle" dominant-baseline="central" >Copilotサービス</text><rect x="303" y="68" width="177" height="196" rx="8" class="s-box" /><text x="315" y="92" class="t" text-anchor="start" dominant-baseline="central" >・承認モデルのみ</text><text x="315" y="117" class="t" text-anchor="start" dominant-baseline="central" >・新モデルは既定無効</text><text x="315" y="142" class="t" text-anchor="start" dominant-baseline="central" >・BYOK無効</text><text x="315" y="167" class="t" text-anchor="start" dominant-baseline="central" >・機能の段階開放</text><text x="315" y="192" class="t" text-anchor="start" dominant-baseline="central" >・予算で停止</text><text x="315" y="248" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.3・4.4・4.6</text><rect x="498" y="20" width="177" height="48" rx="8" class="s-acc" /><text x="586" y="36" class="t-s t-acc t-b" text-anchor="middle" dominant-baseline="central" >関門3</text><text x="586" y="54" class="t t-b" text-anchor="middle" dominant-baseline="central" >外部への出口</text><rect x="498" y="68" width="177" height="196" rx="8" class="s-box" /><text x="510" y="92" class="t" text-anchor="start" dominant-baseline="central" >・プラグイン限定</text><text x="510" y="117" class="t" text-anchor="start" dominant-baseline="central" >・MCP許可リスト</text><text x="510" y="142" class="t" text-anchor="start" dominant-baseline="central" >・ファイアウォール</text><text x="510" y="167" class="t" text-anchor="start" dominant-baseline="central" >・自社ランナー：Egress</text><text x="510" y="248" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.5・4.7・1.4</text><rect x="693" y="20" width="177" height="48" rx="8" class="s-acc" /><text x="781" y="36" class="t-s t-acc t-b" text-anchor="middle" dominant-baseline="central" >関門4</text><text x="781" y="54" class="t t-b" text-anchor="middle" dominant-baseline="central" >成果物の取り込み</text><rect x="693" y="68" width="177" height="196" rx="8" class="s-box" /><text x="705" y="92" class="t" text-anchor="start" dominant-baseline="central" >・PR必須・人が承認</text><text x="705" y="117" class="t" text-anchor="start" dominant-baseline="central" >・CODEOWNERS</text><text x="705" y="142" class="t" text-anchor="start" dominant-baseline="central" >・ワークフローは承認制</text><text x="705" y="167" class="t" text-anchor="start" dominant-baseline="central" >・Copilot code review</text><text x="705" y="248" class="t-s" text-anchor="start" dominant-baseline="central" >→ 4.2・4.7</text><path d="M90,124 L106,124" class="ln" marker-end="url(#ah7)"/><path d="M285,124 L301,124" class="ln" marker-end="url(#ah7)"/><path d="M480,124 L496,124" class="ln" marker-end="url(#ah7)"/><path d="M675,124 L691,124" class="ln" marker-end="url(#ah7)"/><path d="M870,124 L886,124" class="ln" marker-end="url(#ah7)"/><rect x="888" y="64" width="62" height="120" rx="8" class="s-grn" /><text x="919.0" y="114.25" class="t t-b" text-anchor="middle" dominant-baseline="central" >main</text><text x="919.0" y="133.75" class="t-s" text-anchor="middle" dominant-baseline="central" >ブランチ</text><rect x="10" y="282" width="940" height="38" rx="8" class="s-gray" /><text x="480.0" y="301.0" class="t" text-anchor="middle" dominant-baseline="central" >監視：監査ログ・使用量メトリクスAPI（BYOK利用の検知を含む）→ 第7章</text></svg></div><figcaption>どれか1つに頼らず、4つの関門と監視で重ねて止める。コンテンツ除外はセキュリティ境界ではないため、関門1だけでは不十分。</figcaption></figure>
+<h3 id="48-セキュリティ機能ghasありなし">4.8 セキュリティ機能（GHASあり／なし）</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>機能</th>
+<th>GHASなし（private）</th>
+<th>GHASあり</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dependabot、依存関係グラフ</td>
+<td>利用可</td>
+<td>利用可</td>
+</tr>
+<tr>
+<td>ルールセット</td>
+<td>利用可</td>
+<td>利用可</td>
+</tr>
+<tr>
+<td>シークレットリスク評価（無料のポイントインタイム診断）</td>
+<td>利用可</td>
+<td>利用可</td>
+</tr>
+<tr>
+<td>クラウドエージェント組込みのCodeQL・シークレット検査</td>
+<td>利用可（エージェント生成コードのみ）</td>
+<td>利用可</td>
+</tr>
+<tr>
+<td>secret scanning・push protection</td>
+<td><strong>不可</strong></td>
+<td>SP</td>
+</tr>
+<tr>
+<td>CodeQLコードスキャン・Copilot Autofix</td>
+<td>不可</td>
+<td>CS</td>
+</tr>
+</tbody>
+</table></div>
+<p>確度：前版</p>
+<p><strong>GHASなしの代替策</strong>：CIでのOSSのSAST／シークレット検出は、DevSecOpsフレームワークで定義する（→1.4）。本書では、AI利用に伴って増えるシークレット混入の確認として、無料のシークレットリスク評価を四半期ごとに実行することを定める。</p>
+<blockquote class="note">
+<p>Actionsの設定（許可するアクション、GITHUB_TOKENの権限、OIDCなど）は、DevSecOpsフレームワークで扱う（→1.4）。</p>
+</blockquote>
+<hr />
+<h2 id="第5章-ドキュメント体系">第5章 ドキュメント体系</h2>
+<p>開発者が読むのは①②③の3本に限定します。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>文書</th>
+<th>読者</th>
+<th>主な内容</th>
+<th>対応する問い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>①</td>
+<td>生成AI利用ポリシー（Copilot章）</td>
+<td>全員</td>
+<td>承認ツールは会社付与のCopilotのみ。個人プラン・BYOK・ローカルモデル・承認外AIの業務利用禁止。<strong>社外アカウントのリポジトリでの会社ライセンス利用禁止</strong></td>
+<td>Q1-a、Q1-e、Q2</td>
+</tr>
+<tr>
+<td>②</td>
+<td>Copilot利用ガイドライン（標準）</td>
+<td>開発者</td>
+<td>フェーズ別の利用可能機能、承認モデル一覧（Fusion含む）、入力禁止情報、クラウドセッションの共有範囲、コンテンツ除外はセキュリティ境界ではないこと</td>
+<td>Q1-a、Q1-c、Q2、Q4</td>
+</tr>
+<tr>
+<td>③</td>
+<td>AI生成コード・レビュー基準</td>
+<td>開発者・レビュアー</td>
+<td>AI生成PRも同一基準でレビュー、依頼者以外が承認、ワークフロー変更の確認、依存パッケージの実在確認</td>
+<td>Q1-b、Q1-c</td>
+</tr>
+<tr>
+<td>④</td>
+<td>プラグイン（MCP・スキル・エージェント）登録標準</td>
+<td>開発者・チームメンテナー・AIマネージャー</td>
+<td>プラグイン経由に限定、社内マーケットプレイスの審査基準、<strong>チームメンテナーの責任範囲</strong></td>
+<td>Q1-e</td>
+</tr>
+<tr>
+<td>⑤</td>
+<td>管理者運用手順書</td>
+<td>AIマネージャー</td>
+<td>Copilot access移行手順、シート割当の自動化、設定のIaC化と差分検知、新機能・新モデルの評価手順</td>
+<td>Q1-d、Q1-f、Q3</td>
+</tr>
+<tr>
+<td>⑥</td>
+<td>例外管理手順</td>
+<td>管理者</td>
+<td>例外は予算引き上げ・プラグイン追加・クラウドエージェント対象追加の3種に限定、期限付き</td>
+<td>Q1-d、Q3</td>
+</tr>
+<tr>
+<td>⑦</td>
+<td>インシデント対応手順</td>
+<td>セキュリティ</td>
+<td>シークレット入力時のローテーション、予算を$0にして課金機能を即時停止、モデルの無効化</td>
+<td>Q1-a、Q1-f</td>
+</tr>
+<tr>
+<td>⑧</td>
+<td>教育プログラム</td>
+<td>全員</td>
+<td>受講・同意をシート割当の条件にする</td>
+<td>Q2</td>
+</tr>
+<tr>
+<td>⑨</td>
+<td>KPI定義</td>
+<td>委員会</td>
+<td>第7章の指標</td>
+<td>Q5</td>
+</tr>
+<tr>
+<td>⑩</td>
+<td>AIリスク台帳</td>
+<td>委員会</td>
+<td>第6章</td>
+<td>Q5</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="第6章-リスク台帳">第6章 リスク台帳</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>リスク</th>
+<th>管理策（参照先）</th>
+<th>標準</th>
+<th>対応する問い</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R1</td>
+<td>機密情報・シークレットの漏えい</td>
+<td>コンテンツ除外、managed-settingsのdeny、ローカルサンドボックス（→4.5、4.7）</td>
+<td>OWASP LLM02、ISO/IEC 27001 8.12</td>
+<td>Q1-a</td>
+</tr>
+<tr>
+<td>R2</td>
+<td>脆弱なコードの混入</td>
+<td>ルールセット、code review、Dependabot（→4.2、4.8）</td>
+<td>NIST SSDF PW.7、OWASP LLM05</td>
+<td>Q1-b</td>
+</tr>
+<tr>
+<td>R3</td>
+<td>ライセンス汚染</td>
+<td>パブリックコード一致のブロック（→4.4）</td>
+<td>NIST AI 600-1（知的財産）</td>
+<td>Q1-c</td>
+</tr>
+<tr>
+<td>R4</td>
+<td>プロンプトインジェクション</td>
+<td>ファイアウォール、プラグイン限定（→4.5、4.7）</td>
+<td>OWASP LLM01／ASI01</td>
+<td>Q1-a</td>
+</tr>
+<tr>
+<td>R5</td>
+<td>エージェントの過剰権限</td>
+<td>段階開放、全リポジトリでのブロック、bypass禁止、サンドボックス（→3.3、4.4、4.5）</td>
+<td>OWASP LLM06／ASI02</td>
+<td>Q4</td>
+</tr>
+<tr>
+<td>R6</td>
+<td>MCP・プラグイン経由の流出</td>
+<td>strictPluginOnlyCustomization、マーケットプレイス制限、許可リスト（→4.5）</td>
+<td>OWASP LLM03／ASI04</td>
+<td>Q1-e</td>
+</tr>
+<tr>
+<td>R7</td>
+<td>承認外・保持条件の異なるモデルの利用</td>
+<td>既定有効化の無効、モデル個別承認（→4.3）</td>
+<td>ISO/IEC 42001 A.10</td>
+<td>Q1-e</td>
+</tr>
+<tr>
+<td>R8</td>
+<td>コストの上限なし</td>
+<td>多層予算、上限到達時の停止（→4.6）</td>
+<td>OWASP LLM10</td>
+<td>Q1-d</td>
+</tr>
+<tr>
+<td>R9</td>
+<td>シャドーAI（個人プラン・別アカウント）</td>
+<td>EMU、ブロック系ポリシー、利用規程（→4.1、4.4、第5章①）</td>
+<td>ISO/IEC 27001 5.10</td>
+<td>Q1-e</td>
+</tr>
+<tr>
+<td>R10</td>
+<td>過信・レビューの形骸化</td>
+<td>教育、依頼者以外の承認（→第5章③⑧）</td>
+<td>NIST AI 600-1（人間とAIの構成）</td>
+<td>Q1-b</td>
+</tr>
+<tr>
+<td>R11</td>
+<td>監査証跡の不足</td>
+<td>監査ログストリーミング、メトリクス（→4.1、第7章）</td>
+<td>ISO/IEC 27001 8.15</td>
+<td>Q1-f</td>
+</tr>
+<tr>
+<td>R12</td>
+<td>BYOK・ローカルモデル経由の承認外AI利用</td>
+<td>BYOK無効化、メトリクス監視（→4.3、第7章）</td>
+<td>OWASP LLM03／ASI04</td>
+<td>Q1-e</td>
+</tr>
+<tr>
+<td>R13</td>
+<td>セッションデータの同期・共有による開示</td>
+<td>同期の無効化、共有範囲の周知（→4.4、4.7）</td>
+<td>NIST AI 600-1（データプライバシー）</td>
+<td>Q1-a</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="第7章-モニタリング">第7章 モニタリング</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>指標</th>
+<th>データ源</th>
+<th>対応する問い</th>
+<th>確度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>PRリードタイム、変更失敗率（成果の主指標）</td>
+<td>GitHub API、インシデント管理</td>
+<td>Q5</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>ユーザー別AIクレジット消費、予算到達ユーザー数</td>
+<td>使用量メトリクスAPI、課金</td>
+<td>Q1-d</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>BYOK利用者数・利用量（無効化後も検知用に監視）</td>
+<td>使用量メトリクスAPI</td>
+<td>Q1-e</td>
+<td>公式（11/03）</td>
+</tr>
+<tr>
+<td>code reviewの指摘内容と対応率</td>
+<td>使用量メトリクスAPI</td>
+<td>Q1-b</td>
+<td>公式（11/06）</td>
+</tr>
+<tr>
+<td>テレメトリ欠落・クライアントバージョンの遅れ</td>
+<td>使用量メトリクスAPI</td>
+<td>Q1-f</td>
+<td>公式（11/06）</td>
+</tr>
+<tr>
+<td>チャット・VS Codeエージェントの利用状況</td>
+<td>インパクトダッシュボード</td>
+<td>Q5</td>
+<td>公式（11/06）</td>
+</tr>
+<tr>
+<td>エージェント関連の監査イベント</td>
+<td>監査ログ</td>
+<td>Q1-f</td>
+<td>前版</td>
+</tr>
+<tr>
+<td>設定のドリフト件数（モデル、code review、managed-settings）</td>
+<td>API差分検知</td>
+<td>Q2</td>
+<td>前版</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="第8章-次のアクション">第8章 次のアクション</h2>
+<ol>
+<li>アカウントチームに2.5の1・2・4を確認し、Copilot accessへの移行可否と移行月を確定する。</li>
+<li>2.4の未決事項D1〜D9を委員会で決定する。</li>
+<li>フェーズ0として、次を設定する。
+   - ネットワーク許可リスト
+   - モデルの既定有効化の無効化と、BYOKの無効化
+   - strictPluginOnlyCustomization
+   - 多層予算</li>
+<li>Trust Centerでデータ保持（2.5-3）を確認し、利用ガイドラインに反映する。</li>
+</ol>
+<hr />
+<h2 id="第9章-参照した情報2026年11月25日時点">第9章 参照した情報（2026年11月25日時点）</h2>
+<p><strong>GitHub公式</strong>
+- Changelog「GitHub Enterprise now includes access to GitHub Copilot」（2026-10-28）
+- Docs「What's changing with GitHub Enterprise and Copilot billing」
+- Docs「Adopting GitHub Copilot in your enterprise（Enterprise AI governance）」
+- Docs「Content exclusion for GitHub Copilot」「About GitHub Copilot session data」「Blocking agentic features in your enterprise」「Bring your own key」
+- Changelog「GitHub Copilot weekly releases — October 5」（2026-10-09、ローカルサンドボックスGA、別アカウント対応）
+- Changelog「Route and orchestrate models with GitHub Copilot Fusion」（2026-10-28）
+- Changelog「BYOK and enterprise custom models in the Copilot usage API」（2026-11-03）
+- Changelog「Copilot code review: API management and review overview updates」（2026-11-06）
+- Changelog「GitHub App support for Enterprise Copilot seat management」（2026-11-10）
+- Changelog「GitHub Copilot models deprecated on November 16, 2026」（2026-11-16）
+- Changelog「GitHub Copilot weekly releases — November 9」（2026-11-16）
+- Changelog「Control where GitHub Copilot customizations come from」（2026-11-16）
+- Changelog「GitHub Copilot CLI adds Microsoft Entra sign-in as a preview」（2026-11-17）</p>
+<p><strong>二次情報</strong>
+- 「Customize GitHub Copilot for your team」（2026-11-18）の内容は、Changelogを引用した解説記事で確認（原文は未確認）
+- Copilot appのブラウザ操作・Azure DevOps連携（2026-11-17）は報道で確認</p>
+<p><strong>標準・Gartner</strong>
+- Gartner、NIST（AI RMF、AI 600-1、SSDF）、OWASP（LLM Top 10 2025、Agentic Top 10 2026）、ISO/IEC（42001、23894、27001）の整理はv1を継続使用。Gartnerの有料レポート本文は未確認で、報道経由の引用である点も同じ。</p>
+  </main>
+</div>
+<script>
+(function(){
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  var modes=['auto','light','dark'], labels={auto:'表示：自動',light:'表示：ライト',dark:'表示：ダーク'};
+  var cur='auto';
+  try{cur=localStorage.getItem('gov-theme')||'auto';}catch(e){}
+  function apply(m){ if(m==='auto'){root.removeAttribute('data-theme');}else{root.setAttribute('data-theme',m);} btn.textContent=labels[m]; }
+  apply(cur);
+  btn.addEventListener('click',function(){ cur=modes[(modes.indexOf(cur)+1)%3]; apply(cur); try{localStorage.setItem('gov-theme',cur);}catch(e){} });
+  var links=[].slice.call(document.querySelectorAll('nav.toc a'));
+  var heads=links.map(function(a){return document.getElementById(decodeURIComponent(a.hash.slice(1)));});
+  function onScroll(){
+    var y=window.scrollY+80, idx=0;
+    heads.forEach(function(h,i){ if(h && h.offsetTop<=y) idx=i; });
+    links.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>
