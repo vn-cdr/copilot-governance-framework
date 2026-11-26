@@ -14,13 +14,13 @@
   - **未確認**：公式で裏付けが取れていない。導入前に実機またはGitHubへの確認が必要
   - **社内設定値（仮）**：外部の根拠がない社内の初期値。パイロットの実測後に委員会で確定する
 
-### 用語：Copilotの2つの調達方法
+### 用語：GitHub Enterpriseに付いてくるCopilotと、別途購入するCopilot
 
-本書は「Copilot Enterpriseと同等の機能を使う」ことを前提とし、その調達方法を次の2つから選びます。
+本書は「Copilot Enterpriseと同等の機能を使う」ことを前提とし、その契約方法を次の2つから選びます。
 
 | 呼び方 | 中身 | 本書での位置付け |
 |---|---|---|
-| **方式A：GitHub Enterprise同梱のCopilot**（GitHubの呼称：Copilot access） | GitHub Enterprise（GHEC）のライセンスにCopilotが含まれる方式（2026-10-28発表）。シート料$0、含有クレジットなしで、使った分だけ従量課金。製品名ではないため、公式資料では「GitHub Enterprise now includes access to GitHub Copilot」などの表現で説明されている | **原則こちらを採用** |
+| **方式A：GitHub Enterpriseに付いてくるCopilot**（GitHubの呼称：Copilot access） | GitHub Enterprise（GHEC）のライセンスにCopilotが含まれる方式（2026-10-28発表）。シート料$0、含有クレジットなしで、使った分だけ従量課金。製品名ではないため、公式資料では「GitHub Enterprise now includes access to GitHub Copilot」などの表現で説明されている | **原則こちらを採用** |
 | **方式B：Copilot Enterpriseを別途購入** | 従来どおりCopilot Enterpriseのシートを購入する方式。1人月$39で、月3,900クレジット分を含む | 方式Aを契約できない場合、または費用を「人数×$39」で固定したい場合に選ぶ |
 
 本文中の「Copilot access」は方式Aを指します。
@@ -83,7 +83,7 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 | # | 変更内容 |
 |---|---|
 | 1 | 規模を「約5,000」から「**1,000ユーザー以上・1,000リポジトリ以上**」に変更。段階導入の人数は比率で表記 |
-| 2 | **Copilot Businessをスコープ外**に変更。Copilot Enterpriseと同等の機能を前提とし、調達方法は方式A（GitHub Enterprise同梱のCopilot）または方式B（Copilot Enterpriseを別途購入）とする |
+| 2 | **Copilot Businessをスコープ外**に変更。Copilot Enterpriseと同等の機能を前提とし、契約方法は方式A（GitHub Enterpriseに付いてくるCopilot）または方式B（Copilot Enterpriseを別途購入）とする |
 | 3 | 2026年11月25日までのリリースを反映 |
 | 4 | 論点ツリーの各問いと、本書の該当章・設定・文書との対応表を追加 |
 | 5 | 「§」表記を廃止し、「第X章」「X.X」「（→X.X）」の表記に統一 |
@@ -123,7 +123,7 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 | プラットフォーム | GitHub Enterprise Cloud（GHESは対象外） |
 | 規模 | **1,000ユーザー以上**（全員がGHECライセンス保有と仮定）、**1,000リポジトリ以上** |
 | リポジトリ可視性 | 数名の管理者以外はprivateのみ |
-| Copilotの調達方法 | Copilot Enterpriseと同等の機能を前提とする。原則は**方式A：GitHub Enterprise同梱のCopilot**（GitHubの呼称：Copilot access）を採用する。方式Aを契約できない場合、または費用を人数×$39で固定したい場合は、**方式B：Copilot Enterpriseを別途購入**する（→1.3、2.4 D1） |
+| Copilotの契約方法 | Copilot Enterpriseと同等の機能を前提とする。原則は**方式A：GitHub Enterpriseに付いてくるCopilot**（GitHubの呼称：Copilot access）を採用する。方式Aを契約できない場合、または費用を人数×$39で固定したい場合は、**方式B：Copilot Enterpriseを別途購入**する（→1.3、2.4 D1） |
 | GHAS | 追加費用のため未導入の可能性あり。「あり／なし」を併記 |
 | 承認済み生成AI | 限定的（例：Claude・ChatGPTのみ）。Copilot内のモデルも同じ範囲に合わせる想定 |
 | 運用方針 | 申請・例外処理を最小化し、ユーザー責任の「標準」を中心にする |
@@ -135,9 +135,9 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 - 個人プラン（Copilot Free／Pro／Pro+／Max）の業務利用。禁止の対象としてのみ扱う
 - 一般的なソフトウェアサプライチェーン対策と、ランナーのEgress制御。いずれもDevSecOpsフレームワークで扱う（→1.4）
 
-### 1.3 調達方法の比較（方式A・方式B）
+### 1.3 GitHub Enterpriseに付いてくるCopilotと、別途購入するCopilotの比較
 
-| 項目 | 方式A：GitHub Enterprise同梱のCopilot（Copilot access） | 方式B：Copilot Enterpriseを別途購入 |
+| 項目 | 方式A：GitHub Enterpriseに付いてくるCopilot（Copilot access） | 方式B：Copilot Enterpriseを別途購入 |
 |---|---|---|
 | シート料 | GHECライセンス保有者は**$0**（非保有者はCopilot Standaloneで月$10） | 月$39／ユーザー |
 | 含有AIクレジット | **なし**（初回利用から従量） | 3,900／ユーザー／月（エンタープライズ内でプール） |
@@ -240,7 +240,7 @@ Copilot AIガバナンス
 
 | # | 未決事項 | 推奨案と理由 |
 |---|---|---|
-| D1 | 方式A（GitHub Enterprise同梱のCopilot）と方式B（Copilot Enterpriseを別途購入）のどちらで調達するか | **方式Aを推奨（条件付き）**。単価が同じなら総額は方式B以下になる（→1.3）。条件は、アカウントチーム経由で契約できることと、予算を多層で設定・運用できること。どちらかを満たせない場合は方式Bを選ぶ |
+| D1 | 方式A（GitHub Enterpriseに付いてくるCopilot）と方式B（Copilot Enterpriseを別途購入）のどちらで契約するか | **方式Aを推奨（条件付き）**。単価が同じなら総額は方式B以下になる（→1.3）。条件は、アカウントチーム経由で契約できることと、予算を多層で設定・運用できること。どちらかを満たせない場合は方式Bを選ぶ |
 | D2 | 承認モデルの範囲 | 社内承認済みAIのベンダー系に限定。新モデルと代替モデルは手動承認。Fusionもこの範囲に限定し、高コストモデルはFusion用に個別無効化 |
 | D3 | データ保持が必要なモデル（例：Claude Fable 5.2）を許可するか | 法務がデータ保持条件を確認するまで**無効のまま**（既定オフを維持）。ポリシーを有効にすると保持要件を承認したことになる。適格エンタープライズにはZDR（データ非保持）の例外が2026年末まであるため、適格性をアカウントチームに確認。2027年以降の条件（Enterprise Frontier Safeguards）は法務がレビュー |
 | D4 | BYOK（個人キー・ローカルモデル）を許可するか | **禁止**。IDEはポリシーで遮断する。Copilot CLIのローカルBYOKはポリシー対象外のため、規程（第6章①）で禁止し、使用量メトリクスで検知する |
@@ -315,7 +315,7 @@ AIマネージャーには、Enterprise Ownerの代わりに、エンタープ�
 
 | 設定 | 推奨値 | 理由 | 確度 |
 |---|---|---|---|
-| 調達方法 | 方式A：GitHub Enterprise同梱のCopilot（エンタープライズ単位で一括移行） | 2.4 D1 | 公式 |
+| 契約方法 | 方式A：GitHub Enterpriseに付いてくるCopilot（エンタープライズ単位で一括移行） | 2.4 D1 | 公式 |
 | Copilotシート割当 | IdP同期のエンタープライズチーム単位。フェーズごとにチームを拡大 | 自動付与されないため、申請なしで管理できる方式にする | 公式 |
 | シート割当の自動化 | エンタープライズのGitHub App（権限：Enterprise Copilot license management）でシート管理APIを呼ぶ | 個人のPATに依存しない自動化 | 公式（11/10） |
 | EMU | 採用（既存環境なら移行計画を検討） | 個人アカウント混在による迂回と流出を構造的に防ぐ | 前版（未再確認） |
