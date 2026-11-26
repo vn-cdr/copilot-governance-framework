@@ -186,6 +186,30 @@ details.toc-mobile{display:none}
 <li><strong>未確認</strong>：公式で裏付けが取れていない。導入前に実機またはGitHubへの確認が必要</li>
 <li><strong>社内設定値（仮）</strong>：外部の根拠がない社内の初期値。パイロットの実測後に委員会で確定する</li>
 </ul>
+<h3 id="用語copilotの2つの調達方法">用語：Copilotの2つの調達方法</h3>
+<p>本書は「Copilot Enterpriseと同等の機能を使う」ことを前提とし、その調達方法を次の2つから選びます。</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>呼び方</th>
+<th>中身</th>
+<th>本書での位置付け</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>方式A：GitHub Enterprise同梱のCopilot</strong>（GitHubの呼称：Copilot access）</td>
+<td>GitHub Enterprise（GHEC）のライセンスにCopilotが含まれる方式（2026-10-28発表）。シート料$0、含有クレジットなしで、使った分だけ従量課金。製品名ではないため、公式資料では「GitHub Enterprise now includes access to GitHub Copilot」などの表現で説明されている</td>
+<td><strong>原則こちらを採用</strong></td>
+</tr>
+<tr>
+<td><strong>方式B：Copilot Enterpriseを別途購入</strong></td>
+<td>従来どおりCopilot Enterpriseのシートを購入する方式。1人月$39で、月3,900クレジット分を含む</td>
+<td>方式Aを契約できない場合、または費用を「人数×$39」で固定したい場合に選ぶ</td>
+</tr>
+</tbody>
+</table></div>
+<p>本文中の「Copilot access」は方式Aを指します。</p>
 <hr />
 <figure class="fig"><div class="fig-head"><span class="fig-num">図1</span><span class="fig-title">ガバナンスの全体像：3つの層と前提</span></div><div class="fig-scroll"><svg viewBox="0 0 960 410" role="img" aria-label="ガバナンスの全体像" style="min-width:680px"><defs><marker id="ah-ov" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><rect x="60" y="20" width="640" height="100" rx="8" class="s-layer" /><text x="78" y="40" class="t t-b" text-anchor="start" dominant-baseline="central" >① 体制・方針（ルール＝ユーザー責任の「標準」）</text><rect x="80" y="56" width="187" height="50" rx="8" class="s-box" /><text x="173.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AIガバナンス委員会</text><text x="173.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >承認・意思決定</text><rect x="287" y="56" width="187" height="50" rx="8" class="s-box" /><text x="380.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >生成AI利用ポリシー</text><text x="380.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >（文書①）</text><rect x="494" y="56" width="187" height="50" rx="8" class="s-box" /><text x="587.5" y="71.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >利用ガイドライン（②）</text><text x="587.5" y="90.375" class="t-s" text-anchor="middle" dominant-baseline="central" >レビュー基準（③）</text><rect x="60" y="150" width="640" height="110" rx="8" class="s-layer-acc" /><text x="78" y="170" class="t t-b t-acc" text-anchor="start" dominant-baseline="central" >② 技術で強制（GitHub設定）</text><rect x="75" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="147.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >AI Controls</text><text x="147.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >モデル・機能・BYOK</text><rect x="230" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="302.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >managed-settings</text><text x="302.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >権限・sandbox・MCP</text><rect x="385" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="457.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >ルールセット</text><text x="457.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >CODEOWNERS</text><rect x="540" y="186" width="145" height="60" rx="8" class="s-acc" /><text x="612.5" y="206.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >予算</text><text x="612.5" y="225.375" class="t-s" text-anchor="middle" dominant-baseline="central" >上限で停止</text><rect x="60" y="290" width="640" height="100" rx="8" class="s-layer" /><text x="78" y="310" class="t t-b" text-anchor="start" dominant-baseline="central" >③ 監視・見直し（技術で止められない部分の検知を含む）</text><rect x="80" y="326" width="187" height="50" rx="8" class="s-box" /><text x="173.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >使用量メトリクスAPI</text><text x="173.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >コスト・BYOK検知</text><rect x="287" y="326" width="187" height="50" rx="8" class="s-box" /><text x="380.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >監査ログ（SIEM）</text><text x="380.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >エージェント操作の追跡</text><rect x="494" y="326" width="187" height="50" rx="8" class="s-box" /><text x="587.5" y="341.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >四半期レビュー</text><text x="587.5" y="360.375" class="t-s" text-anchor="middle" dominant-baseline="central" >設定の棚卸し・台帳更新</text><path d="M380,120 L380,148" class="ln" marker-end="url(#ah-ov)"/><path d="M380,260 L380,288" class="ln" marker-end="url(#ah-ov)"/><path d="M60,350 L34,350 L34,70 L58,70" class="ln" marker-end="url(#ah-ov)"/><text x="22" y="210" class="t-s" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 22 210)">見直しを反映</text><rect x="735" y="150" width="205" height="110" rx="8" class="s-gray s-dash" /><text x="837" y="172" class="t t-b" text-anchor="middle" dominant-baseline="central" >前提（本書の対象外）</text><text x="837" y="200" class="t" text-anchor="middle" dominant-baseline="central" >DevSecOpsフレームワーク</text><text x="837" y="224" class="t" text-anchor="middle" dominant-baseline="central" >ランナーのEgress制御</text><text x="837" y="246" class="t-s" text-anchor="middle" dominant-baseline="central" >→1.4</text><path d="M700,205 L733,205" class="ln ln-dash" marker-end="url(#ah-ov)"/><text x="717" y="192" class="t-s" text-anchor="middle" dominant-baseline="central" >要件</text></svg></div><figcaption>方針でルールを決め、強制できるものはGitHub設定で担保し、監視の結果を方針に戻す。CLIのローカルBYOKのように技術で止められない部分は、規程で禁止して監視で検知する。</figcaption></figure>
 <h2 id="第0章-変更点">第0章 変更点</h2>
@@ -301,7 +325,7 @@ details.toc-mobile{display:none}
 </tr>
 <tr>
 <td>2</td>
-<td><strong>Copilot Businessをスコープ外</strong>に変更。Copilot Enterprise相当（GitHub Enterpriseプランに含まれるCopilot access、またはCopilot Enterprise）を前提とする</td>
+<td><strong>Copilot Businessをスコープ外</strong>に変更。Copilot Enterpriseと同等の機能を前提とし、調達方法は方式A（GitHub Enterprise同梱のCopilot）または方式B（Copilot Enterpriseを別途購入）とする</td>
 </tr>
 <tr>
 <td>3</td>
@@ -485,8 +509,8 @@ details.toc-mobile{display:none}
 <td>数名の管理者以外はprivateのみ</td>
 </tr>
 <tr>
-<td>Copilotの提供方式</td>
-<td><strong>Copilot Enterprise相当</strong>：GitHub Enterpriseプランに含まれる「Copilot access」を第一候補、Copilot Enterpriseを代替とする</td>
+<td>Copilotの調達方法</td>
+<td>Copilot Enterpriseと同等の機能を前提とする。原則は<strong>方式A：GitHub Enterprise同梱のCopilot</strong>（GitHubの呼称：Copilot access）を採用する。方式Aを契約できない場合、または費用を人数×$39で固定したい場合は、<strong>方式B：Copilot Enterpriseを別途購入</strong>する（→1.3、2.4 D1）</td>
 </tr>
 <tr>
 <td>GHAS</td>
@@ -509,13 +533,13 @@ details.toc-mobile{display:none}
 <li>個人プラン（Copilot Free／Pro／Pro+／Max）の業務利用。禁止の対象としてのみ扱う</li>
 <li>一般的なソフトウェアサプライチェーン対策と、ランナーのEgress制御（→1.4）</li>
 </ul>
-<h3 id="13-提供方式の比較copilot-enterprise相当の2方式">1.3 提供方式の比較（Copilot Enterprise相当の2方式）</h3>
+<h3 id="13-調達方法の比較方式a方式b">1.3 調達方法の比較（方式A・方式B）</h3>
 <div class="table-wrap"><table>
 <thead>
 <tr>
 <th>項目</th>
-<th>Copilot access（GitHub Enterpriseプラン同梱）</th>
-<th>Copilot Enterprise</th>
+<th>方式A：GitHub Enterprise同梱のCopilot（Copilot access）</th>
+<th>方式B：Copilot Enterpriseを別途購入</th>
 </tr>
 </thead>
 <tbody>
@@ -567,8 +591,8 @@ details.toc-mobile{display:none}
 <thead>
 <tr>
 <th>月間の利用額</th>
-<th>Copilot Enterprise</th>
-<th>Copilot access</th>
+<th>方式B（Copilot Enterprise）</th>
+<th>方式A（Copilot access）</th>
 </tr>
 </thead>
 <tbody>
@@ -589,8 +613,8 @@ details.toc-mobile{display:none}
 </tr>
 </tbody>
 </table></div>
-<p>示唆：単価が同じなら、Copilot accessは常にCopilot Enterprise以下のコストになる。ただし<strong>シート料という上限がなく、従量部分の歯止めは予算設定だけ</strong>になる（→4.6）。予算で止まらない補完の課金上の扱いは2.5で確認する。</p>
-<figure class="fig"><div class="fig-head"><span class="fig-num">図3</span><span class="fig-title">提供方式別の月額コスト（1,000名の場合）</span></div><div class="fig-scroll"><svg viewBox="0 0 960 380" role="img" aria-label="提供方式別の月額コスト" style="min-width:680px"><defs><marker id="ah-cost" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><line x1="90.0" y1="320.0" x2="890.0" y2="320.0" class="grid"/><text x="80.0" y="320.0" class="t-s" text-anchor="end" dominant-baseline="central" >$0</text><text x="90.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$0</text><line x1="90.0" y1="250.0" x2="890.0" y2="250.0" class="grid"/><text x="80.0" y="250.0" class="t-s" text-anchor="end" dominant-baseline="central" >$20k</text><text x="290.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$20k</text><line x1="90.0" y1="180.0" x2="890.0" y2="180.0" class="grid"/><text x="80.0" y="180.0" class="t-s" text-anchor="end" dominant-baseline="central" >$40k</text><text x="490.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$40k</text><line x1="90.0" y1="110.0" x2="890.0" y2="110.0" class="grid"/><text x="80.0" y="110.0" class="t-s" text-anchor="end" dominant-baseline="central" >$60k</text><text x="690.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$60k</text><line x1="90.0" y1="40.0" x2="890.0" y2="40.0" class="grid"/><text x="80.0" y="40.0" class="t-s" text-anchor="end" dominant-baseline="central" >$80k</text><text x="890.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$80k</text><polygon points="90.0,320.0 480.0,183.5 90.0,183.5" class="area"/><text x="195.0" y="215.0" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >access の方が安い領域</text><text x="195.0" y="230.75" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >（未使用枠の失効分）</text><path d="M90.0,320.0 L890.0,40.0" class="ln-access"/><path d="M90.0,183.5 L480.0,183.5 L890.0,40.0" class="ln-ent"/><circle cx="480.0" cy="183.5" r="5" class="dot"/><text x="492.0" y="201.5" class="t-s" text-anchor="start" dominant-baseline="central" >利用額 $39k で一致。以降は同額</text><line x1="110" y1="34" x2="140" y2="34" class="ln-access"/><text x="148" y="34" class="t" text-anchor="start" dominant-baseline="central" >Copilot access（シート料$0・全量従量）</text><line x1="110" y1="58" x2="140" y2="58" class="ln-ent"/><text x="148" y="58" class="t" text-anchor="start" dominant-baseline="central" >Copilot Enterprise（$39×人数が最低額）</text><text x="490" y="362" class="t-s" text-anchor="middle" dominant-baseline="central" >月間の利用額（AIクレジット換算、1クレジット＝$0.01）</text><text x="24" y="180" class="t-s" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 24 180)">月額コスト</text><rect x="630" y="226" width="260" height="62" rx="8" class="s-amb" /><text x="760.0" y="247.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >従量部分の上限は予算だけ</text><text x="760.0" y="266.375" class="t-s" text-anchor="middle" dominant-baseline="central" >補完は予算0でも止まらない（→4.6）</text></svg></div><figcaption>単価は公式の1クレジット＝$0.01。当社固有の割引はアカウントチームに確認する（→2.5）。</figcaption></figure>
+<p>示唆：単価が同じなら、方式Aの総額は常に方式B以下になる。ただし<strong>シート料という上限がなく、従量部分の歯止めは予算設定だけ</strong>になる（→4.6）。予算で止まらない補完の課金上の扱いは2.5で確認する。</p>
+<figure class="fig"><div class="fig-head"><span class="fig-num">図3</span><span class="fig-title">調達方法別の月額コスト（1,000名の場合）</span></div><div class="fig-scroll"><svg viewBox="0 0 960 380" role="img" aria-label="提供方式別の月額コスト" style="min-width:680px"><defs><marker id="ah-cost" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs><line x1="90.0" y1="320.0" x2="890.0" y2="320.0" class="grid"/><text x="80.0" y="320.0" class="t-s" text-anchor="end" dominant-baseline="central" >$0</text><text x="90.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$0</text><line x1="90.0" y1="250.0" x2="890.0" y2="250.0" class="grid"/><text x="80.0" y="250.0" class="t-s" text-anchor="end" dominant-baseline="central" >$20k</text><text x="290.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$20k</text><line x1="90.0" y1="180.0" x2="890.0" y2="180.0" class="grid"/><text x="80.0" y="180.0" class="t-s" text-anchor="end" dominant-baseline="central" >$40k</text><text x="490.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$40k</text><line x1="90.0" y1="110.0" x2="890.0" y2="110.0" class="grid"/><text x="80.0" y="110.0" class="t-s" text-anchor="end" dominant-baseline="central" >$60k</text><text x="690.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$60k</text><line x1="90.0" y1="40.0" x2="890.0" y2="40.0" class="grid"/><text x="80.0" y="40.0" class="t-s" text-anchor="end" dominant-baseline="central" >$80k</text><text x="890.0" y="338.0" class="t-s" text-anchor="middle" dominant-baseline="central" >$80k</text><polygon points="90.0,320.0 480.0,183.5 90.0,183.5" class="area"/><text x="195.0" y="215.0" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >方式Aの方が安い領域</text><text x="195.0" y="230.75" class="t-s t-acc" text-anchor="middle" dominant-baseline="central" >（未使用枠の失効分）</text><path d="M90.0,320.0 L890.0,40.0" class="ln-access"/><path d="M90.0,183.5 L480.0,183.5 L890.0,40.0" class="ln-ent"/><circle cx="480.0" cy="183.5" r="5" class="dot"/><text x="492.0" y="201.5" class="t-s" text-anchor="start" dominant-baseline="central" >利用額 $39k で一致。以降は同額</text><line x1="110" y1="34" x2="140" y2="34" class="ln-access"/><text x="148" y="34" class="t" text-anchor="start" dominant-baseline="central" >方式A：Copilot access（シート料$0・全量従量）</text><line x1="110" y1="58" x2="140" y2="58" class="ln-ent"/><text x="148" y="58" class="t" text-anchor="start" dominant-baseline="central" >方式B：Copilot Enterprise（$39×人数が最低額）</text><text x="490" y="362" class="t-s" text-anchor="middle" dominant-baseline="central" >月間の利用額（AIクレジット換算、1クレジット＝$0.01）</text><text x="24" y="180" class="t-s" text-anchor="middle" dominant-baseline="central" transform="rotate(-90 24 180)">月額コスト</text><rect x="630" y="226" width="260" height="62" rx="8" class="s-amb" /><text x="760.0" y="247.625" class="t t-b" text-anchor="middle" dominant-baseline="central" >従量部分の上限は予算だけ</text><text x="760.0" y="266.375" class="t-s" text-anchor="middle" dominant-baseline="central" >補完は予算0でも止まらない（→4.6）</text></svg></div><figcaption>単価は公式の1クレジット＝$0.01。当社固有の割引はアカウントチームに確認する（→2.5）。</figcaption></figure>
 <h3 id="14-前提とする既存の取り組み本書の対象外">1.4 前提とする既存の取り組み（本書の対象外）</h3>
 <p>AIの有無にかかわらず必要な対策は、別途検討する次の取り組みで定義・実装する。本書はこれらが整備されていることを前提とし、内容は記載しない。</p>
 <div class="table-wrap"><table>
@@ -816,8 +840,8 @@ details.toc-mobile{display:none}
 <tbody>
 <tr>
 <td>D1</td>
-<td>Copilot accessとCopilot Enterpriseのどちらにするか</td>
-<td><strong>Copilot accessを推奨（条件付き）</strong>。単価が同じなら常に同等以下のコスト（→1.3）。条件は、予算を多層で設定できることと、アカウントチーム経由で契約できること</td>
+<td>方式A（GitHub Enterprise同梱のCopilot）と方式B（Copilot Enterpriseを別途購入）のどちらで調達するか</td>
+<td><strong>方式Aを推奨（条件付き）</strong>。単価が同じなら総額は方式B以下になる（→1.3）。条件は、アカウントチーム経由で契約できることと、予算を多層で設定・運用できること。どちらかを満たせない場合は方式Bを選ぶ</td>
 </tr>
 <tr>
 <td>D2</td>
@@ -1015,8 +1039,8 @@ details.toc-mobile{display:none}
 </thead>
 <tbody>
 <tr>
-<td>課金モデル</td>
-<td>Copilot access（エンタープライズ単位で一括移行）</td>
+<td>調達方法</td>
+<td>方式A：GitHub Enterprise同梱のCopilot（エンタープライズ単位で一括移行）</td>
 <td>2.4 D1</td>
 <td>公式</td>
 </tr>
