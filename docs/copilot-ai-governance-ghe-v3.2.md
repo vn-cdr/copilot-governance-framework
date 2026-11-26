@@ -25,6 +25,8 @@
 
 本文中の「Copilot access」は方式Aを指します。
 
+出典：方式Aの概要は[GitHub Changelog「GitHub Enterprise now includes access to GitHub Copilot」（2026-10-28）](https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot/)。両方式の料金・含有クレジットは[GitHub Docs「What's changing with GitHub Enterprise and Copilot billing」](https://docs.github.com/en/copilot/get-started/whats-changing-with-github-enterprise-and-copilot)の比較表。
+
 ---
 
 ## 目次
@@ -52,10 +54,10 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 | # | 箇所 | v3.1の記載 | v3.2での修正 | 確度 |
 |---|---|---|---|---|
 | 1 | 4.5 | strictPluginOnlyCustomizationの値に`"mcpServers"`を例示 | 正しいカテゴリ名は`"mcp"`。誤った値ではMCPを遮断できないおそれがある | 公式 |
-| 2 | 4.6 | 予算アラートは50%／75%／90% | **75%／90%／100%の固定**で、50%は設定できない。早期検知はメトリクスの週次集計で代替 | 公式 |
+| 2 | 4.6 | 予算アラートは50%／75%／90% | **75%／90%／100%の固定**で、50%は設定できない（出典：[GitHub Docs「Setting up budgets」](https://docs.github.com/en/billing/how-tos/set-up-budgets)）。早期検知はメトリクスの週次集計で代替 | 公式 |
 | 3 | 4.4 | Copilot appはCLIポリシーに依存 | 2026-07-27から**Copilot app専用のポリシー**があり、CLIとは独立 | 公式 |
 | 4 | 4.7、3.3 | コンテンツ除外はIDEのエージェントにも適用 | **Docsの記載に差異あり**（IDEのEdit／Agentモードは非対応とする記載が残っている）。また`permissions.deny`等はVS Codeでは**Agent Hostセッションにしか効かない**。フェーズ2の条件に実機検証とAgent Host限定を追加 | 公式（記載差異あり） |
-| 5 | 1.3、第6章⑦ | 予算$0でCopilotを即時停止できる | Copilot accessでは予算$0でも**コード補完・次の編集候補は継続**し、アクセスも失われない。全面停止はシート割当の解除で行う | 公式 |
+| 5 | 1.3、第6章⑦ | 予算$0でCopilotを即時停止できる | Copilot accessでは予算$0でも**コード補完・次の編集候補は継続**し、アクセスも失われない（出典：[GitHub Changelog「GitHub Enterprise now includes access to GitHub Copilot」（2026-10-28）](https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot/)）。全面停止はシート割当の解除で行う | 公式 |
 | 6 | 4.3 | BYOKはポリシーで無効化できる | IDEはポリシーで無効化できるが、**Copilot CLIのローカルBYOKはエンタープライズポリシーの対象外**。規程で禁止し、メトリクスで検知する | 公式 |
 | 7 | 4.4 | 新機能の既定ポリシーを無効にすればよい | 既定ポリシーは**2026-10-22〜26に未構成の機能へ一回限り適用済み**。後から既定を変えても戻らないため、フェーズ0で全ポリシーを棚卸しする | 公式 |
 
@@ -148,6 +150,11 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 
 確度：公式
 
+出典：
+- シート料・含有クレジット・Copilot Standalone・混在不可・月初発効：[GitHub Docs「What's changing with GitHub Enterprise and Copilot billing」](https://docs.github.com/en/copilot/get-started/whats-changing-with-github-enterprise-and-copilot)
+- 契約経路・予算が尽きたときの挙動：[GitHub Changelog「GitHub Enterprise now includes access to GitHub Copilot」（2026-10-28）](https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot/)
+- AIクレジット単価：[GitHub Docs「Billing（Copilot）」](https://docs.github.com/en/copilot/concepts/billing-and-usage/organizations-and-enterprises/billing)
+
 **試算（1,000名、全員GHECライセンス保有、単価は公式の1クレジット＝$0.01。当社固有の割引は2.5で確認）**
 
 | 月間の利用額 | 方式B（Copilot Enterprise） | 方式A（Copilot access） |
@@ -155,6 +162,8 @@ v3.1に対して第三者レビューを行い、24件の指摘（重大度 高7
 | $20,000 | $39,000（未使用枠は失効） | **$20,000** |
 | $39,000 | $39,000 | $39,000 |
 | $60,000 | $39,000＋超過$21,000＝$60,000 | $60,000 |
+
+計算方法（本書の試算）：方式Bは「$39×1,000名＝$39,000」が最低額で、含有クレジット（3,900×1,000名×$0.01＝$39,000相当）を超えた分だけ追加課金。方式Aは利用額がそのまま請求額。利用額の3つの水準は説明用の仮定値。
 
 示唆：単価が同じなら、方式Aの総額は常に方式B以下になる。ただし**シート料という上限がなく、従量部分の歯止めは予算設定だけ**になる（→4.6）。予算で止まらない補完の課金上の扱いは2.5で確認する。
 
@@ -400,7 +409,7 @@ AIマネージャーには、Enterprise Ownerの代わりに、エンタープ�
 | 項目 | 内容 | 確度 |
 |---|---|---|
 | permissions（deny・bypass禁止） | エージェントに禁止する読み取り・コマンドを指定する。**VS Codeでは、この細かな権限ルールはAgent Hostセッションにしか適用されない**（→2.4 D10） | 公式 |
-| sandbox | ローカルサンドボックスを強制する。`failIfUnavailable:true`でサンドボックスが使えない環境では実行させない。最小バージョン（VS Code 1.141.0／CLI 1.0.93／Copilot app 1.1.26）を満たさないクライアントは接続を遮断されるため、事前に周知する | 公式 |
+| sandbox | ローカルサンドボックスを強制する。`failIfUnavailable:true`でサンドボックスが使えない環境では実行させない。最小バージョン（VS Code 1.141.0／CLI 1.0.93／Copilot app 1.1.26。出典：[GitHub Docs「Enterprise managed settings」](https://docs.github.com/en/copilot/reference/enterprise-administrators/enterprise-managed-settings)）を満たさないクライアントは接続を遮断されるため、事前に周知する | 公式 |
 | features.computerUse | ブラウザ操作を含むcomputer useを止める | 公式 |
 | remoteControl | セッションのリモート操作を止める | 公式 |
 | strictPluginOnlyCustomization | 指定したカテゴリ（`mcp`、`extensions`、`hooks`など）について、ユーザー・プロジェクト単位の独自設定を遮断し、プラグインまたはmanaged settings由来だけを許可する。`true`で全カテゴリが対象。複数の管理ソースの制限は結合され、ユーザー設定・リポジトリ設定では緩められない。**マーケットプレイスの許可リストではない**ため、strictKnownMarketplacesと組み合わせる | 公式 |
@@ -416,10 +425,10 @@ AIマネージャーには、Enterprise Ownerの代わりに、エンタープ�
 |---|---|---|
 | ユーザー単位の予算（共通上限／コストセンター別上限／個別ユーザー上限の3種） | 共通上限：パイロット実測の中央値の2〜3倍（社内設定値（仮））。個別ユーザー上限は例外時のみ、有効期限付き。**ユーザー単位の予算は常にハードストップ**（停止の設定は不要） | 公式（仕様）／社内設定値（仮）（金額） |
 | コストセンター／組織／エンタープライズ予算 | 設定し、**「Stop usage when budget limit is reached」を明示的に選ぶ**（選ばないと上限後も止まらない） | 公式 |
-| アラート | **75%／90%／100%（固定）**。50%時点の早期検知は、使用量メトリクスAPIのユーザー別`ai_credits_used`を週次で集計して代替（社内設定値（仮）） | 公式 |
+| アラート | **75%／90%／100%（固定）**（出典：[GitHub Docs「Setting up budgets」](https://docs.github.com/en/billing/how-tos/set-up-budgets)）。50%時点の早期検知は、使用量メトリクスAPIのユーザー別`ai_credits_used`を週次で集計して代替（社内設定値（仮）） | 公式 |
 | 予算申請 | 例外申請の窓口として利用 | 公式（機能の存在） |
 | コストセンターの確認 | REST APIでリソースの所属コストセンターを照会し、割当漏れを検知 | 公式（11/03） |
-| 予算が尽きたとき（Copilot access） | AIクレジット消費機能は停止、補完・次の編集候補は継続。**利用を全面停止するにはシート割当を解除する** | 公式 |
+| 予算が尽きたとき（Copilot access） | AIクレジット消費機能は停止、補完・次の編集候補は継続（出典：[GitHub Changelog「GitHub Enterprise now includes access to GitHub Copilot」（2026-10-28）](https://github.blog/changelog/2026-10-28-github-enterprise-now-includes-access-to-github-copilot/)）。**利用を全面停止するにはシート割当を解除する** | 公式 |
 | code reviewのActions分数 | code reviewはAIクレジットに加えてActions分数も消費する。Actions分数はAIクレジットの予算の対象外のため、Actions側の予算も設定する | 公式（コミュニティ告知） |
 | 予算の見直し頻度 | 月次。ユーザー別メトリクスは日次集計の確定まで最大2日遅れるため、日次での厳密な追跡には向かない | 公式（遅延）／社内設定値（仮）（頻度） |
 
